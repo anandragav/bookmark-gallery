@@ -31,5 +31,8 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     exclude: ['.Trash', '.DS_Store'],
+    scan: {
+      excludeAll: true
+    }
   },
 }));
