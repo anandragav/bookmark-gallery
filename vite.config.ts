@@ -30,15 +30,18 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    entries: [
-      'src/**/*.{ts,tsx}',
-      'index.html',
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@tanstack/react-query',
+      'lucide-react',
     ],
     exclude: [
-      'node_modules/**/*',
-      'dist/**/*',
-      '.git/**/*',
+      '.git/**',
+      '.vscode/**',
+      'node_modules/.bin/**',
+      'dist/**',
     ],
-    force: true,
   },
 }));
