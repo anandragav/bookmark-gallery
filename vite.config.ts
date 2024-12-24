@@ -29,4 +29,11 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Exclude problematic directories and files
+  exclude: [
+    '.Trash',
+    '.DS_Store',
+    'node_modules',
+    'dist'
+  ]
 }));
