@@ -52,7 +52,7 @@ const Index = () => {
     };
 
     // Get Chrome bookmarks
-    if (chrome.bookmarks) {
+    if (typeof chrome !== 'undefined' && chrome.bookmarks) {
       chrome.bookmarks.getTree((bookmarkTreeNodes) => {
         const processedFolders = processBookmarks(bookmarkTreeNodes);
         setFolders(processedFolders);
