@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    exclude: ['**/.*'],
+    exclude: ['**/.*/'],
     force: true,
   },
 }));
