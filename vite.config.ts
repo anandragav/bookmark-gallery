@@ -30,7 +30,15 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    exclude: ['**/.*/'],
+    entries: [
+      'src/**/*.{ts,tsx}',
+      'index.html',
+    ],
+    exclude: [
+      'node_modules/**/*',
+      'dist/**/*',
+      '.git/**/*',
+    ],
     force: true,
   },
 }));
