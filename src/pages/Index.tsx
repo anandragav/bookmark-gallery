@@ -1,45 +1,65 @@
+import { useEffect, useState } from "react";
 import { BookmarkFolder } from "@/components/BookmarkFolder";
 
-// Mock data - this would be replaced with actual Chrome bookmarks API data
-const mockFolders = [
-  {
-    title: "Development",
-    thumbnailUrl: "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
-    bookmarks: [
-      { title: "GitHub", url: "https://github.com" },
-      { title: "Stack Overflow", url: "https://stackoverflow.com" },
-      { title: "MDN Web Docs", url: "https://developer.mozilla.org" },
-    ],
-  },
-  {
-    title: "Productivity",
-    thumbnailUrl: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
-    bookmarks: [
-      { title: "Notion", url: "https://notion.so" },
-      { title: "Trello", url: "https://trello.com" },
-      { title: "Google Calendar", url: "https://calendar.google.com" },
-    ],
-  },
-  {
-    title: "Learning",
-    thumbnailUrl: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-    bookmarks: [
-      { title: "Coursera", url: "https://coursera.org" },
-      { title: "edX", url: "https://edx.org" },
-      { title: "Khan Academy", url: "https://khanacademy.org" },
-    ],
-  },
-  {
-    title: "Design Resources",
-    bookmarks: [
-      { title: "Dribbble", url: "https://dribbble.com" },
-      { title: "Behance", url: "https://behance.net" },
-      { title: "Figma", url: "https://figma.com" },
-    ],
-  },
-];
+interface ChromeBookmark {
+  id: string;
+  title: string;
+  url?: string;
+  children?: ChromeBookmark[];
+}
+
+interface ProcessedFolder {
+  title: string;
+  thumbnailUrl?: string;
+  bookmarks: { title: string; url: string }[];
+}
 
 const Index = () => {
+  const [folders, setFolders] = useState<ProcessedFolder[]>([]);
+
+  useEffect(() => {
+    const processBookmarks = (bookmarks: ChromeBookmark[]) => {
+      const processedFolders: ProcessedFolder[] = [];
+
+      const processNode = (node: ChromeBookmark) => {
+        if (!node.url && node.children) {
+          // This is a folder
+          const bookmarks = node.children
+            .filter((child) => child.url) // Only include actual bookmarks
+            .map((child) => ({
+              title: child.title,
+              url: child.url!,
+            }));
+
+          if (bookmarks.length > 0) {
+            processedFolders.push({
+              title: node.title,
+              bookmarks,
+              // You could potentially extract thumbnail from the first bookmark's favicon
+              thumbnailUrl: undefined,
+            });
+          }
+        }
+
+        // Recursively process children
+        if (node.children) {
+          node.children.forEach(processNode);
+        }
+      };
+
+      bookmarks.forEach(processNode);
+      return processedFolders;
+    };
+
+    // Get Chrome bookmarks
+    if (chrome.bookmarks) {
+      chrome.bookmarks.getTree((bookmarkTreeNodes) => {
+        const processedFolders = processBookmarks(bookmarkTreeNodes);
+        setFolders(processedFolders);
+      });
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
@@ -51,7 +71,7 @@ const Index = () => {
         </header>
 
         <div className="masonry-grid">
-          {mockFolders.map((folder, index) => (
+          {folders.map((folder, index) => (
             <BookmarkFolder
               key={index}
               title={folder.title}
