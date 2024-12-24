@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    exclude: ['**/.Trash/**', '**/.DS_Store/**'],
+    exclude: ['**/.*'],
     force: true,
   },
 }));
