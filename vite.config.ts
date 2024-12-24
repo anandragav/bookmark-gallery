@@ -29,19 +29,4 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      '@tanstack/react-query',
-      'lucide-react',
-    ],
-    exclude: [
-      '.git/**',
-      '.vscode/**',
-      'node_modules/.bin/**',
-      'dist/**',
-    ],
-  },
 }));
