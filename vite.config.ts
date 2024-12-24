@@ -14,6 +14,15 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
+  build: {
+    rollupOptions: {
+      input: {
+        index: path.resolve(__dirname, 'index.html'),
+      },
+    },
+    outDir: 'dist',
+  },
+  publicDir: 'public', // This ensures public files are copied to dist
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
