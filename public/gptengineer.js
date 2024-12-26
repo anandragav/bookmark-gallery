@@ -1,2 +1,3 @@
-// The content will be downloaded from https://cdn.gpteng.co/gptengineer.js
-// For now, we'll create an empty file that will be replaced with the actual content
+// This file will be downloaded from https://cdn.gpteng.co/gptengineer.js
+// For development purposes, we're creating an empty file
+console.log('GPT Engineer development mode');
