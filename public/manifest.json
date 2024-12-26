@@ -7,7 +7,7 @@
     "bookmarks"
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval' https://cdn.gpteng.co; object-src 'self'; frame-src 'self'"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co; object-src 'self'; frame-src 'self'"
   },
   "action": {
     "default_popup": "index.html",
