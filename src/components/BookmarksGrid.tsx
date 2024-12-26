@@ -13,17 +13,22 @@ interface ProcessedFolder {
 
 interface BookmarksGridProps {
   folders: ProcessedFolder[];
+  view: "grid" | "list";
 }
 
-export function BookmarksGrid({ folders }: BookmarksGridProps) {
+export function BookmarksGrid({ folders, view }: BookmarksGridProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+    <div className={view === "grid" 
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr" 
+      : "flex flex-col gap-4"
+    }>
       {folders.map((folder, index) => (
         <BookmarkFolder
           key={index}
           title={folder.title}
           bookmarks={folder.bookmarks}
           thumbnailUrl={folder.thumbnailUrl}
+          view={view}
         />
       ))}
       {folders.length === 0 && (

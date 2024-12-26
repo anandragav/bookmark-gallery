@@ -16,11 +16,13 @@ interface ProcessedFolder {
 }
 
 type SortOption = "alphabetical" | "bookmarkCount" | "recent";
+type ViewMode = "grid" | "list";
 
 const Index = () => {
   const [folders, setFolders] = useState<ProcessedFolder[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("alphabetical");
+  const [view, setView] = useState<ViewMode>("grid");
 
   useEffect(() => {
     const processBookmarks = (bookmarks: ChromeBookmark[]) => {
@@ -109,8 +111,6 @@ const Index = () => {
       case "bookmarkCount":
         return b.bookmarks.length - a.bookmarks.length;
       case "recent":
-        // For demo purposes, we'll just reverse the alphabetical order
-        // In a real implementation, you'd want to track creation/modification dates
         return b.title.localeCompare(a.title);
       default:
         return 0;
@@ -125,8 +125,10 @@ const Index = () => {
           onSearchChange={setSearchQuery}
           sortOption={sortOption}
           onSortChange={(value) => setSortOption(value as SortOption)}
+          view={view}
+          onViewChange={setView}
         />
-        <BookmarksGrid folders={sortedFolders} />
+        <BookmarksGrid folders={sortedFolders} view={view} />
       </div>
     </div>
   );

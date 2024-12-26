@@ -11,9 +11,10 @@ interface BookmarkFolderProps {
   title: string;
   bookmarks: Bookmark[];
   thumbnailUrl?: string;
+  view: "grid" | "list";
 }
 
-export function BookmarkFolder({ title, bookmarks, thumbnailUrl }: BookmarkFolderProps) {
+export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: BookmarkFolderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const getFolderIcon = (title: string) => {
@@ -33,12 +34,14 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl }: BookmarkFolde
   };
 
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
+    <Card className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
+      view === "list" ? "flex" : ""
+    }`}>
       <div 
-        className="cursor-pointer"
+        className={`cursor-pointer ${view === "list" ? "flex flex-1" : ""}`}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="relative aspect-video overflow-hidden">
+        <div className={`relative ${view === "list" ? "w-48" : "aspect-video"} overflow-hidden`}>
           {thumbnailUrl ? (
             <img
               src={thumbnailUrl}
@@ -52,18 +55,20 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl }: BookmarkFolde
           )}
         </div>
         
-        <div className="p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg">{title}</h3>
-            <ChevronRight 
-              className={`w-5 h-5 transition-transform duration-300 ${
-                isExpanded ? "rotate-90" : "group-hover:translate-x-1"
-              }`}
-            />
+        <div className={`p-4 ${view === "list" ? "flex-1 flex items-center justify-between" : ""}`}>
+          <div>
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-lg">{title}</h3>
+              <ChevronRight 
+                className={`w-5 h-5 transition-transform duration-300 ${
+                  isExpanded ? "rotate-90" : "group-hover:translate-x-1"
+                }`}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              {bookmarks.length} bookmark{bookmarks.length !== 1 ? 's' : ''}
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            {bookmarks.length} bookmark{bookmarks.length !== 1 ? 's' : ''}
-          </p>
         </div>
       </div>
 

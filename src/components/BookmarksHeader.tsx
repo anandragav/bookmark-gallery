@@ -7,12 +7,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ViewToggle } from "./ViewToggle";
 
 interface BookmarksHeaderProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   sortOption: string;
   onSortChange: (value: string) => void;
+  view: "grid" | "list";
+  onViewChange: (view: "grid" | "list") => void;
 }
 
 export function BookmarksHeader({
@@ -20,6 +23,8 @@ export function BookmarksHeader({
   onSearchChange,
   sortOption,
   onSortChange,
+  view,
+  onViewChange,
 }: BookmarksHeaderProps) {
   return (
     <header className="text-center mb-16">
@@ -53,6 +58,7 @@ export function BookmarksHeader({
             <SelectItem value="recent">Most Recent</SelectItem>
           </SelectContent>
         </Select>
+        <ViewToggle view={view} onViewChange={onViewChange} />
       </div>
     </header>
   );
