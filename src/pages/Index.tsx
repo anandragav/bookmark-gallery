@@ -88,16 +88,18 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-7xl mx-auto">
-        <header className="mb-12">
-          <h1 className="text-4xl font-bold mb-4">Bookmarks Gallery</h1>
-          <p className="text-lg text-muted-foreground">
-            Your bookmarks, beautifully organized
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <header className="text-center mb-16">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent mb-4">
+            Bookmarks Gallery
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Your bookmarks, beautifully organized in an elegant gallery view
           </p>
         </header>
 
-        <div className="masonry-grid">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
           {folders.map((folder, index) => (
             <BookmarkFolder
               key={index}
