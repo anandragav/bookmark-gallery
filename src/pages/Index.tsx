@@ -25,7 +25,7 @@ const Index = () => {
         if (!node.url && node.children) {
           // This is a folder
           const bookmarks = node.children
-            .filter((child) => child.url) // Only include actual bookmarks
+            .filter((child) => child.url)
             .map((child) => ({
               title: child.title,
               url: child.url!,
@@ -35,13 +35,11 @@ const Index = () => {
             processedFolders.push({
               title: node.title,
               bookmarks,
-              // You could potentially extract thumbnail from the first bookmark's favicon
               thumbnailUrl: undefined,
             });
           }
         }
 
-        // Recursively process children
         if (node.children) {
           node.children.forEach(processNode);
         }
@@ -51,12 +49,41 @@ const Index = () => {
       return processedFolders;
     };
 
-    // Get Chrome bookmarks
+    // Check if Chrome bookmarks API is available
     if (typeof chrome !== 'undefined' && chrome.bookmarks) {
       chrome.bookmarks.getTree((bookmarkTreeNodes) => {
         const processedFolders = processBookmarks(bookmarkTreeNodes);
         setFolders(processedFolders);
       });
+    } else {
+      // Sample data for development
+      const sampleFolders: ProcessedFolder[] = [
+        {
+          title: "Development Resources",
+          bookmarks: [
+            { title: "GitHub", url: "https://github.com" },
+            { title: "Stack Overflow", url: "https://stackoverflow.com" },
+            { title: "MDN Web Docs", url: "https://developer.mozilla.org" },
+          ],
+        },
+        {
+          title: "Social Media",
+          bookmarks: [
+            { title: "Twitter", url: "https://twitter.com" },
+            { title: "LinkedIn", url: "https://linkedin.com" },
+            { title: "Facebook", url: "https://facebook.com" },
+          ],
+        },
+        {
+          title: "News",
+          bookmarks: [
+            { title: "BBC News", url: "https://bbc.com/news" },
+            { title: "CNN", url: "https://cnn.com" },
+            { title: "The Guardian", url: "https://theguardian.com" },
+          ],
+        },
+      ];
+      setFolders(sampleFolders);
     }
   }, []);
 
