@@ -28,17 +28,17 @@ export function BookmarksHeader({
   onViewChange,
 }: BookmarksHeaderProps) {
   return (
-    <header className="text-center mb-16">
+    <header className="mb-16">
       <div className="flex justify-end mb-4">
         <ThemeToggle />
       </div>
-      <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent mb-4">
-        Bookmarks Gallery
+      <h1 className="text-4xl font-bold text-left mb-4">
+        Better Bookmarks
       </h1>
-      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+      <p className="text-lg text-muted-foreground mb-8 text-left">
         Your bookmarks, beautifully organized in an elegant gallery view
       </p>
-      <div className="flex items-center gap-4 max-w-md mx-auto mt-8">
+      <div className="flex items-center gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
