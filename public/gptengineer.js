@@ -1,3 +1,6 @@
-// This file will be downloaded from https://cdn.gpteng.co/gptengineer.js
-// For development purposes, we're creating an empty file
+// Development mode - mock implementation
 console.log('GPT Engineer development mode');
+window.gptengineer = {
+  // Add any mock functions needed for development
+  init: () => console.log('GPT Engineer initialized'),
+};
