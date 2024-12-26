@@ -1,13 +1,13 @@
 // Development mode - mock implementation
 window.gptengineer = {
-  init: async () => {
+  init: async function() {
     console.log('GPT Engineer initialized in development mode');
     return {
       success: true,
       message: 'Development environment initialized'
     };
   },
-  getBookmarks: async () => {
+  getBookmarks: async function() {
     console.log('Fetching mock bookmarks');
     return [
       {
