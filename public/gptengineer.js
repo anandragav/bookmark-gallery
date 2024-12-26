@@ -2,15 +2,21 @@
 window.gptengineer = {
   init: () => {
     console.log('GPT Engineer initialized in development mode');
-    return {
+    return Promise.resolve({
       success: true,
       message: 'Development environment initialized'
-    };
+    });
   },
   getBookmarks: () => {
-    return Promise.resolve([]);
+    return Promise.resolve([
+      {
+        id: '1',
+        title: 'Example Bookmark',
+        url: 'https://example.com',
+        dateAdded: new Date().getTime()
+      }
+    ]);
   },
-  // Add any other required mock functions
   version: '1.0.0-dev'
 };
 
