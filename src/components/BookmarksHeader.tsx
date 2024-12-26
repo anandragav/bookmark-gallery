@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ViewToggle } from "./ViewToggle";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface BookmarksHeaderProps {
   searchQuery: string;
@@ -28,6 +29,9 @@ export function BookmarksHeader({
 }: BookmarksHeaderProps) {
   return (
     <header className="text-center mb-16">
+      <div className="flex justify-end mb-4">
+        <ThemeToggle />
+      </div>
       <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent mb-4">
         Bookmarks Gallery
       </h1>
