@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { BookmarksHeader } from "@/components/BookmarksHeader";
 import { BookmarksGrid } from "@/components/BookmarksGrid";
+import { CreateFolderDialog } from "@/components/CreateFolderDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useHotkeys } from "react-hotkeys-hook";
 
@@ -38,7 +39,6 @@ const Index = () => {
     e.preventDefault();
     document.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
   });
-
   useHotkeys('g', () => setView('grid'));
   useHotkeys('l', () => setView('list'));
   useHotkeys('esc', () => setSearchQuery(''));
@@ -72,6 +72,14 @@ const Index = () => {
     bookmarks.forEach(processNode);
     return processedFolders;
   }, []);
+
+  const handleCreateFolder = (folderName: string) => {
+    const newFolder: ProcessedFolder = {
+      title: folderName,
+      bookmarks: [],
+    };
+    setFolders((prev) => [...prev, newFolder]);
+  };
 
   // Fetch bookmarks
   useEffect(() => {
@@ -186,6 +194,9 @@ const Index = () => {
           view={view}
           onViewChange={setView}
         />
+        <div className="mb-6 flex justify-end">
+          <CreateFolderDialog onFolderCreate={handleCreateFolder} />
+        </div>
         <BookmarksGrid 
           folders={displayedFolders} 
           view={view} 

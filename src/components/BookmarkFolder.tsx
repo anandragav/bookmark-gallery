@@ -1,6 +1,8 @@
-import { Folder, ExternalLink, ChevronRight, Globe, Code, Newspaper, Share2 } from "lucide-react";
+import { Folder, ExternalLink, ChevronRight, Globe, Code, Newspaper, Share2, Copy, Check } from "lucide-react";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface Bookmark {
   title: string;
@@ -16,6 +18,8 @@ interface BookmarkFolderProps {
 
 export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: BookmarkFolderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
+  const { toast } = useToast();
 
   const getFolderIcon = (title: string) => {
     const lowercaseTitle = title.toLowerCase();
@@ -31,6 +35,26 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     if (lowercaseTitle.includes('social')) return 'from-purple-500/5 to-purple-500/10';
     if (lowercaseTitle.includes('news')) return 'from-orange-500/5 to-orange-500/10';
     return 'from-gray-500/5 to-gray-500/10';
+  };
+
+  const handleCopyUrl = async (url: string, title: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedStates({ ...copiedStates, [url]: true });
+      toast({
+        title: "URL Copied",
+        description: `Copied ${title}'s URL to clipboard`,
+      });
+      setTimeout(() => {
+        setCopiedStates({ ...copiedStates, [url]: false });
+      }, 2000);
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to copy URL to clipboard",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -79,17 +103,37 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
       >
         <div className="p-4 space-y-2">
           {bookmarks.map((bookmark, index) => (
-            <a
+            <div
               key={index}
-              href={bookmark.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm hover:text-primary transition-colors p-2 rounded-lg hover:bg-muted animate-fade-in"
+              className="flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-muted animate-fade-in"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <ExternalLink className="w-4 h-4" />
-              {bookmark.title}
-            </a>
+              <a
+                href={bookmark.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm hover:text-primary transition-colors flex-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="w-4 h-4" />
+                {bookmark.title}
+              </a>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopyUrl(bookmark.url, bookmark.title);
+                }}
+              >
+                {copiedStates[bookmark.url] ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           ))}
         </div>
       </div>
