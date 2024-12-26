@@ -46,7 +46,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
         description: `Copied ${title}'s URL to clipboard`,
       });
       setTimeout(() => {
-        setCopiedStates({ ...copiedStates, [url]: false });
+        setCopiedStates((prev) => ({ ...prev, [url]: false }));
       }, 2000);
     } catch (err) {
       toast({
@@ -57,13 +57,18 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     }
   };
 
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <Card className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
       view === "list" ? "flex" : ""
     }`}>
       <div 
         className={`cursor-pointer ${view === "list" ? "flex flex-1" : ""}`}
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={handleToggle}
       >
         <div className={`relative ${view === "list" ? "w-48" : "aspect-video"} overflow-hidden`}>
           {thumbnailUrl ? (
