@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
-import { BookmarkFolder } from "@/components/BookmarkFolder";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { BookmarksHeader } from "@/components/BookmarksHeader";
+import { BookmarksGrid } from "@/components/BookmarksGrid";
 
 interface ChromeBookmark {
   id: string;
@@ -128,57 +120,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <header className="text-center mb-16">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent mb-4">
-            Bookmarks Gallery
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Your bookmarks, beautifully organized in an elegant gallery view
-          </p>
-          <div className="flex items-center gap-4 max-w-md mx-auto mt-8">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search bookmarks..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select
-              value={sortOption}
-              onValueChange={(value) => setSortOption(value as SortOption)}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="alphabetical">Alphabetical</SelectItem>
-                <SelectItem value="bookmarkCount">Bookmark Count</SelectItem>
-                <SelectItem value="recent">Most Recent</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </header>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-          {sortedFolders.map((folder, index) => (
-            <BookmarkFolder
-              key={index}
-              title={folder.title}
-              bookmarks={folder.bookmarks}
-              thumbnailUrl={folder.thumbnailUrl}
-            />
-          ))}
-          {sortedFolders.length === 0 && (
-            <div className="col-span-full text-center py-12">
-              <p className="text-lg text-muted-foreground">
-                No bookmarks found matching your search.
-              </p>
-            </div>
-          )}
-        </div>
+        <BookmarksHeader
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          sortOption={sortOption}
+          onSortChange={(value) => setSortOption(value as SortOption)}
+        />
+        <BookmarksGrid folders={sortedFolders} />
       </div>
     </div>
   );
