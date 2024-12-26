@@ -58,19 +58,25 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
   };
 
   const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
-    setIsExpanded(!isExpanded);
+    setIsExpanded((prev) => !prev);
   };
 
   return (
-    <Card className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
-      view === "list" ? "flex" : ""
-    }`}>
+    <Card 
+      className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
+        view === "list" ? "flex" : ""
+      }`}
+    >
       <div 
         className={`cursor-pointer ${view === "list" ? "flex flex-1" : ""}`}
         onClick={handleToggle}
       >
-        <div className={`relative ${view === "list" ? "w-48" : "aspect-video"} overflow-hidden`}>
+        <div 
+          className={`relative ${view === "list" ? "w-48" : "aspect-video"} overflow-hidden`}
+          onClick={(e) => e.stopPropagation()}
+        >
           {thumbnailUrl ? (
             <img
               src={thumbnailUrl}
