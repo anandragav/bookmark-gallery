@@ -43,7 +43,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
   };
 
   return (
-    <Card className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
+    <Card className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-card ${
       view === "list" ? "flex" : ""
     }`}>
       <div 
@@ -68,7 +68,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
       </div>
 
       <div
-        className={`overflow-hidden transition-all duration-300 ${
+        className={`overflow-hidden transition-all duration-300 bg-card ${
           isExpanded ? "max-h-[400px] border-t" : "max-h-0"
         }`}
       >
