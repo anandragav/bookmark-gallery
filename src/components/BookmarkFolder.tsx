@@ -46,7 +46,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     <Card className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
       view === "list" ? "flex" : ""
     }`}>
-      <div className="flex flex-1">
+      <div className="flex items-center">
         <div 
           className="cursor-pointer flex-1"
           onClick={() => setIsExpanded((prev) => !prev)}
@@ -59,7 +59,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
           />
         </div>
         <button 
-          className="p-4 flex items-center"
+          className="p-4"
           onClick={() => setIsExpanded((prev) => !prev)}
         >
           <ChevronRight 
