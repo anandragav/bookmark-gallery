@@ -46,9 +46,9 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     <Card className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
       view === "list" ? "flex" : ""
     }`}>
-      <div className="flex items-center">
+      <div className="flex">
         <div 
-          className="cursor-pointer flex-1"
+          className="cursor-pointer flex-1 flex"
           onClick={() => setIsExpanded((prev) => !prev)}
         >
           <FolderHeader
@@ -57,17 +57,20 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
             bookmarksCount={bookmarks.length}
             view={view}
           />
+          <button 
+            className="p-4"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded((prev) => !prev);
+            }}
+          >
+            <ChevronRight 
+              className={`w-5 h-5 transition-transform duration-300 ${
+                isExpanded ? "rotate-90" : "group-hover:translate-x-1"
+              }`}
+            />
+          </button>
         </div>
-        <button 
-          className="p-4"
-          onClick={() => setIsExpanded((prev) => !prev)}
-        >
-          <ChevronRight 
-            className={`w-5 h-5 transition-transform duration-300 ${
-              isExpanded ? "rotate-90" : "group-hover:translate-x-1"
-            }`}
-          />
-        </button>
       </div>
 
       <div
