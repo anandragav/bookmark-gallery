@@ -7,8 +7,14 @@
     "bookmarks"
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co http://localhost:* http://127.0.0.1:*; object-src 'self'; frame-src 'self' http://localhost:* http://127.0.0.1:*"
+    "extension_pages": "script-src 'self' https://cdn.gpteng.co; object-src 'self';"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["gptengineer.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "action": {
     "default_popup": "index.html",
     "default_icon": {
