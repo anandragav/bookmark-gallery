@@ -33,7 +33,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl }: BookmarkFolde
   };
 
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
       <div 
         className="cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -46,7 +46,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl }: BookmarkFolde
               className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className={`flex items-center justify-center h-full bg-gradient-to-br ${getBackgroundGradient(title)}`}>
+            <div className={`flex items-center justify-center h-full bg-gradient-to-br ${getBackgroundGradient(title)} transition-all duration-300 group-hover:opacity-80`}>
               {getFolderIcon(title)}
             </div>
           )}
@@ -79,7 +79,8 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl }: BookmarkFolde
               href={bookmark.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm hover:text-primary transition-colors p-2 rounded-lg hover:bg-muted"
+              className="flex items-center gap-2 text-sm hover:text-primary transition-colors p-2 rounded-lg hover:bg-muted animate-fade-in"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
               <ExternalLink className="w-4 h-4" />
               {bookmark.title}
