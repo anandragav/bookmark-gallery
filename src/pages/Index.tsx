@@ -23,6 +23,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("alphabetical");
   const [view, setView] = useState<ViewMode>("grid");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const processBookmarks = (bookmarks: ChromeBookmark[]) => {
@@ -30,7 +31,6 @@ const Index = () => {
 
       const processNode = (node: ChromeBookmark) => {
         if (!node.url && node.children) {
-          // This is a folder
           const bookmarks = node.children
             .filter((child) => child.url)
             .map((child) => ({
@@ -56,42 +56,54 @@ const Index = () => {
       return processedFolders;
     };
 
-    // Check if Chrome bookmarks API is available
-    if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-      chrome.bookmarks.getTree((bookmarkTreeNodes) => {
-        const processedFolders = processBookmarks(bookmarkTreeNodes);
-        setFolders(processedFolders);
-      });
-    } else {
-      // Sample data for development
-      const sampleFolders: ProcessedFolder[] = [
-        {
-          title: "Development Resources",
-          bookmarks: [
-            { title: "GitHub", url: "https://github.com" },
-            { title: "Stack Overflow", url: "https://stackoverflow.com" },
-            { title: "MDN Web Docs", url: "https://developer.mozilla.org" },
-          ],
-        },
-        {
-          title: "Social Media",
-          bookmarks: [
-            { title: "Twitter", url: "https://twitter.com" },
-            { title: "LinkedIn", url: "https://linkedin.com" },
-            { title: "Facebook", url: "https://facebook.com" },
-          ],
-        },
-        {
-          title: "News",
-          bookmarks: [
-            { title: "BBC News", url: "https://bbc.com/news" },
-            { title: "CNN", url: "https://cnn.com" },
-            { title: "The Guardian", url: "https://theguardian.com" },
-          ],
-        },
-      ];
-      setFolders(sampleFolders);
-    }
+    const fetchBookmarks = async () => {
+      setIsLoading(true);
+      try {
+        if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+          chrome.bookmarks.getTree((bookmarkTreeNodes) => {
+            const processedFolders = processBookmarks(bookmarkTreeNodes);
+            setFolders(processedFolders);
+            setIsLoading(false);
+          });
+        } else {
+          // Sample data for development
+          const sampleFolders: ProcessedFolder[] = [
+            {
+              title: "Development Resources",
+              bookmarks: [
+                { title: "GitHub", url: "https://github.com" },
+                { title: "Stack Overflow", url: "https://stackoverflow.com" },
+                { title: "MDN Web Docs", url: "https://developer.mozilla.org" },
+              ],
+            },
+            {
+              title: "Social Media",
+              bookmarks: [
+                { title: "Twitter", url: "https://twitter.com" },
+                { title: "LinkedIn", url: "https://linkedin.com" },
+                { title: "Facebook", url: "https://facebook.com" },
+              ],
+            },
+            {
+              title: "News",
+              bookmarks: [
+                { title: "BBC News", url: "https://bbc.com/news" },
+                { title: "CNN", url: "https://cnn.com" },
+                { title: "The Guardian", url: "https://theguardian.com" },
+              ],
+            },
+          ];
+          setFolders(sampleFolders);
+          // Simulate loading delay in development
+          setTimeout(() => setIsLoading(false), 1000);
+        }
+      } catch (error) {
+        console.error('Error fetching bookmarks:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchBookmarks();
   }, []);
 
   const filteredFolders = folders.filter((folder) => {
@@ -128,7 +140,11 @@ const Index = () => {
           view={view}
           onViewChange={setView}
         />
-        <BookmarksGrid folders={sortedFolders} view={view} />
+        <BookmarksGrid 
+          folders={sortedFolders} 
+          view={view} 
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );
