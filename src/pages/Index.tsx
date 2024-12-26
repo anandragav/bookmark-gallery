@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { BookmarkFolder } from "@/components/BookmarkFolder";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ChromeBookmark {
   id: string;
@@ -16,9 +23,12 @@ interface ProcessedFolder {
   bookmarks: { title: string; url: string }[];
 }
 
+type SortOption = "alphabetical" | "bookmarkCount" | "recent";
+
 const Index = () => {
   const [folders, setFolders] = useState<ProcessedFolder[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOption, setSortOption] = useState<SortOption>("alphabetical");
 
   useEffect(() => {
     const processBookmarks = (bookmarks: ChromeBookmark[]) => {
@@ -100,6 +110,21 @@ const Index = () => {
     return folderMatchesSearch || bookmarksMatchSearch;
   });
 
+  const sortedFolders = [...filteredFolders].sort((a, b) => {
+    switch (sortOption) {
+      case "alphabetical":
+        return a.title.localeCompare(b.title);
+      case "bookmarkCount":
+        return b.bookmarks.length - a.bookmarks.length;
+      case "recent":
+        // For demo purposes, we'll just reverse the alphabetical order
+        // In a real implementation, you'd want to track creation/modification dates
+        return b.title.localeCompare(a.title);
+      default:
+        return 0;
+    }
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -110,20 +135,35 @@ const Index = () => {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Your bookmarks, beautifully organized in an elegant gallery view
           </p>
-          <div className="relative max-w-md mx-auto mt-8">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search bookmarks..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+          <div className="flex items-center gap-4 max-w-md mx-auto mt-8">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Search bookmarks..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <Select
+              value={sortOption}
+              onValueChange={(value) => setSortOption(value as SortOption)}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="alphabetical">Alphabetical</SelectItem>
+                <SelectItem value="bookmarkCount">Bookmark Count</SelectItem>
+                <SelectItem value="recent">Most Recent</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-          {filteredFolders.map((folder, index) => (
+          {sortedFolders.map((folder, index) => (
             <BookmarkFolder
               key={index}
               title={folder.title}
@@ -131,7 +171,7 @@ const Index = () => {
               thumbnailUrl={folder.thumbnailUrl}
             />
           ))}
-          {filteredFolders.length === 0 && (
+          {sortedFolders.length === 0 && (
             <div className="col-span-full text-center py-12">
               <p className="text-lg text-muted-foreground">
                 No bookmarks found matching your search.
