@@ -26,30 +26,3 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
-<lov-write file_path="public/manifest.json">
-{
-  "manifest_version": 3,
-  "name": "Bookmark Gallery",
-  "description": "A beautiful gallery view for your Chrome bookmarks",
-  "version": "1.0",
-  "permissions": [
-    "bookmarks"
-  ],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co http://localhost:* http://127.0.0.1:*; object-src 'self'; frame-src 'self' http://localhost:* http://127.0.0.1:*"
-  },
-  "action": {
-    "default_popup": "index.html",
-    "default_icon": {
-      "16": "icon16.png",
-      "48": "icon48.png",
-      "128": "icon128.png"
-    }
-  },
-  "icons": {
-    "16": "icon16.png",
-    "48": "icon48.png",
-    "128": "icon128.png"
-  }
-}
