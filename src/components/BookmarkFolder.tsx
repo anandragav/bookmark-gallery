@@ -1,4 +1,4 @@
-import { Folder, ExternalLink, ChevronRight } from "lucide-react";
+import { Folder, ExternalLink, ChevronRight, Globe, Code, Newspaper, Share2 } from "lucide-react";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 
@@ -16,13 +16,29 @@ interface BookmarkFolderProps {
 export function BookmarkFolder({ title, bookmarks, thumbnailUrl }: BookmarkFolderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const getFolderIcon = (title: string) => {
+    const lowercaseTitle = title.toLowerCase();
+    if (lowercaseTitle.includes('development')) return <Code className="w-12 h-12 text-primary/60" />;
+    if (lowercaseTitle.includes('social')) return <Share2 className="w-12 h-12 text-primary/60" />;
+    if (lowercaseTitle.includes('news')) return <Newspaper className="w-12 h-12 text-primary/60" />;
+    return <Globe className="w-12 h-12 text-primary/60" />;
+  };
+
+  const getBackgroundGradient = (title: string) => {
+    const lowercaseTitle = title.toLowerCase();
+    if (lowercaseTitle.includes('development')) return 'from-blue-500/5 to-blue-500/10';
+    if (lowercaseTitle.includes('social')) return 'from-purple-500/5 to-purple-500/10';
+    if (lowercaseTitle.includes('news')) return 'from-orange-500/5 to-orange-500/10';
+    return 'from-gray-500/5 to-gray-500/10';
+  };
+
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
       <div 
         className="cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="relative aspect-video overflow-hidden bg-muted">
+        <div className="relative aspect-video overflow-hidden">
           {thumbnailUrl ? (
             <img
               src={thumbnailUrl}
@@ -30,8 +46,8 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl }: BookmarkFolde
               className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
-            <div className="flex items-center justify-center h-full bg-gradient-to-br from-primary/5 to-primary/10">
-              <Folder className="w-12 h-12 text-primary/40" />
+            <div className={`flex items-center justify-center h-full bg-gradient-to-br ${getBackgroundGradient(title)}`}>
+              {getFolderIcon(title)}
             </div>
           )}
         </div>
@@ -46,7 +62,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl }: BookmarkFolde
             />
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            {bookmarks.length} bookmarks
+            {bookmarks.length} bookmark{bookmarks.length !== 1 ? 's' : ''}
           </p>
         </div>
       </div>
