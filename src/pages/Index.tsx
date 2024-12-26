@@ -1,22 +1,10 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { BookmarksHeader } from "@/components/BookmarksHeader";
 import { BookmarksGrid } from "@/components/BookmarksGrid";
 import { CreateFolderDialog } from "@/components/CreateFolderDialog";
-import { useToast } from "@/components/ui/use-toast";
+import { QuickAccess } from "@/components/QuickAccess";
+import { useBookmarks } from "@/hooks/useBookmarks";
 import { useHotkeys } from "react-hotkeys-hook";
-
-interface ChromeBookmark {
-  id: string;
-  title: string;
-  url?: string;
-  children?: ChromeBookmark[];
-}
-
-interface ProcessedFolder {
-  title: string;
-  thumbnailUrl?: string;
-  bookmarks: { title: string; url: string }[];
-}
 
 type SortOption = "alphabetical" | "bookmarkCount" | "recent";
 type ViewMode = "grid" | "list";
@@ -24,15 +12,13 @@ type ViewMode = "grid" | "list";
 const ITEMS_PER_PAGE = 9;
 
 const Index = () => {
-  const [folders, setFolders] = useState<ProcessedFolder[]>([]);
-  const [displayedFolders, setDisplayedFolders] = useState<ProcessedFolder[]>([]);
+  const { folders, isLoading, quickAccessBookmarks } = useBookmarks();
+  const [displayedFolders, setDisplayedFolders] = useState(folders);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("alphabetical");
   const [view, setView] = useState<ViewMode>("grid");
-  const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const loadingRef = useRef(null);
-  const { toast } = useToast();
 
   // Keyboard shortcuts
   useHotkeys('ctrl+f', (e) => {
@@ -43,99 +29,13 @@ const Index = () => {
   useHotkeys('l', () => setView('list'));
   useHotkeys('esc', () => setSearchQuery(''));
 
-  const processBookmarks = useCallback((bookmarks: ChromeBookmark[]) => {
-    const processedFolders: ProcessedFolder[] = [];
-
-    const processNode = (node: ChromeBookmark) => {
-      if (!node.url && node.children) {
-        const bookmarks = node.children
-          .filter((child) => child.url)
-          .map((child) => ({
-            title: child.title,
-            url: child.url!,
-          }));
-
-        if (bookmarks.length > 0) {
-          processedFolders.push({
-            title: node.title,
-            bookmarks,
-            thumbnailUrl: undefined,
-          });
-        }
-      }
-
-      if (node.children) {
-        node.children.forEach(processNode);
-      }
-    };
-
-    bookmarks.forEach(processNode);
-    return processedFolders;
-  }, []);
-
   const handleCreateFolder = (folderName: string) => {
-    const newFolder: ProcessedFolder = {
+    const newFolder = {
       title: folderName,
       bookmarks: [],
     };
-    setFolders((prev) => [...prev, newFolder]);
+    setDisplayedFolders((prev) => [...prev, newFolder]);
   };
-
-  // Fetch bookmarks
-  useEffect(() => {
-    const fetchBookmarks = async () => {
-      setIsLoading(true);
-      try {
-        if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-          chrome.bookmarks.getTree((bookmarkTreeNodes) => {
-            const processedFolders = processBookmarks(bookmarkTreeNodes);
-            setFolders(processedFolders);
-            setIsLoading(false);
-          });
-        } else {
-          // Sample data for development
-          const sampleFolders: ProcessedFolder[] = [
-            {
-              title: "Development Resources",
-              bookmarks: [
-                { title: "GitHub", url: "https://github.com" },
-                { title: "Stack Overflow", url: "https://stackoverflow.com" },
-                { title: "MDN Web Docs", url: "https://developer.mozilla.org" },
-              ],
-            },
-            {
-              title: "Social Media",
-              bookmarks: [
-                { title: "Twitter", url: "https://twitter.com" },
-                { title: "LinkedIn", url: "https://linkedin.com" },
-                { title: "Facebook", url: "https://facebook.com" },
-              ],
-            },
-            {
-              title: "News",
-              bookmarks: [
-                { title: "BBC News", url: "https://bbc.com/news" },
-                { title: "CNN", url: "https://cnn.com" },
-                { title: "The Guardian", url: "https://theguardian.com" },
-              ],
-            },
-          ];
-          setFolders(sampleFolders);
-          setTimeout(() => setIsLoading(false), 1000);
-        }
-      } catch (error) {
-        console.error('Error fetching bookmarks:', error);
-        setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Failed to load bookmarks. Please try again.",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchBookmarks();
-  }, [processBookmarks, toast]);
 
   // Filter and sort folders
   useEffect(() => {
@@ -197,6 +97,7 @@ const Index = () => {
         <div className="mb-6 flex justify-end">
           <CreateFolderDialog onFolderCreate={handleCreateFolder} />
         </div>
+        <QuickAccess bookmarks={quickAccessBookmarks} />
         <BookmarksGrid 
           folders={displayedFolders} 
           view={view} 
