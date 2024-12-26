@@ -6,6 +6,9 @@
   "permissions": [
     "bookmarks"
   ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://cdn.gpteng.co; object-src 'self'"
+  },
   "action": {
     "default_popup": "index.html",
     "default_icon": {
