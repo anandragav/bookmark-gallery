@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { BookmarksHeader } from "@/components/BookmarksHeader";
 import { BookmarksGrid } from "@/components/BookmarksGrid";
-import { CreateFolderDialog } from "@/components/CreateFolderDialog";
 import { QuickAccess } from "@/components/QuickAccess";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -20,7 +19,6 @@ const Index = () => {
   const [page, setPage] = useState(1);
   const loadingRef = useRef(null);
 
-  // Keyboard shortcuts
   useHotkeys('ctrl+f', (e) => {
     e.preventDefault();
     document.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
@@ -94,9 +92,6 @@ const Index = () => {
           view={view}
           onViewChange={setView}
         />
-        <div className="mb-6 flex justify-end">
-          <CreateFolderDialog onFolderCreate={handleCreateFolder} />
-        </div>
         <QuickAccess bookmarks={quickAccessBookmarks} />
         <BookmarksGrid 
           folders={displayedFolders} 
