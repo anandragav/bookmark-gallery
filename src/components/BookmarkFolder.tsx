@@ -37,6 +37,15 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     return 'from-gray-500/5 to-gray-500/10';
   };
 
+  const getFaviconUrl = (url: string) => {
+    try {
+      const domain = new URL(url).hostname;
+      return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+    } catch {
+      return null;
+    }
+  };
+
   const handleCopyUrl = async (url: string, title: string) => {
     try {
       await navigator.clipboard.writeText(url);
@@ -106,38 +115,53 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
         }`}
       >
         <div className="p-4 space-y-2">
-          {bookmarks.map((bookmark, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-muted animate-fade-in"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <a
-                href={bookmark.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm hover:text-primary transition-colors flex-1"
+          {bookmarks.map((bookmark, index) => {
+            const faviconUrl = getFaviconUrl(bookmark.url);
+            return (
+              <div
+                key={index}
+                className="flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-muted animate-fade-in"
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <ExternalLink className="w-4 h-4" />
-                {bookmark.title}
-              </a>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleCopyUrl(bookmark.url, bookmark.title);
-                }}
-              >
-                {copiedStates[bookmark.url] ? (
-                  <Check className="h-4 w-4 text-green-500" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          ))}
+                <a
+                  href={bookmark.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm hover:text-primary transition-colors flex-1"
+                >
+                  {faviconUrl ? (
+                    <img 
+                      src={faviconUrl} 
+                      alt="" 
+                      className="w-4 h-4"
+                      onError={(e) => {
+                        e.currentTarget.src = '';
+                        e.currentTarget.className = 'hidden';
+                      }}
+                    />
+                  ) : (
+                    <ExternalLink className="w-4 h-4" />
+                  )}
+                  {bookmark.title}
+                </a>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCopyUrl(bookmark.url, bookmark.title);
+                  }}
+                >
+                  {copiedStates[bookmark.url] ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </Card>
