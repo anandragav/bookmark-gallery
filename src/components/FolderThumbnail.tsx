@@ -4,9 +4,15 @@ interface FolderThumbnailProps {
   title: string;
   folderThumbnail: string | null;
   thumbnailError: boolean;
+  onThumbnailError: () => void;
 }
 
-export function FolderThumbnail({ title, folderThumbnail, thumbnailError }: FolderThumbnailProps) {
+export function FolderThumbnail({ 
+  title, 
+  folderThumbnail, 
+  thumbnailError,
+  onThumbnailError 
+}: FolderThumbnailProps) {
   const getFolderIcon = (title: string) => {
     const lowercaseTitle = title.toLowerCase();
     if (lowercaseTitle.includes('development')) return <Code className="w-12 h-12 text-primary/60" />;
@@ -29,7 +35,7 @@ export function FolderThumbnail({ title, folderThumbnail, thumbnailError }: Fold
         src={folderThumbnail}
         alt={title}
         className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-        onError={() => setThumbnailError(true)}
+        onError={onThumbnailError}
       />
     );
   }

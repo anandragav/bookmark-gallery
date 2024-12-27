@@ -71,6 +71,10 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     setIsExpanded((prev) => !prev);
   };
 
+  const handleThumbnailError = () => {
+    setThumbnailError(true);
+  };
+
   return (
     <Card 
       className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
@@ -83,6 +87,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
             title={title}
             folderThumbnail={folderThumbnail}
             thumbnailError={thumbnailError}
+            onThumbnailError={handleThumbnailError}
           />
         </div>
         
