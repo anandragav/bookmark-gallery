@@ -1,5 +1,5 @@
 import { Folder, ExternalLink, ChevronRight, Globe, Code, Newspaper, Share2, Copy, Check } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,20 @@ interface BookmarkFolderProps {
 export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: BookmarkFolderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
+  const [folderThumbnail, setFolderThumbnail] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (bookmarks.length > 0) {
+      try {
+        const firstBookmarkUrl = new URL(bookmarks[0].url).toString();
+        setFolderThumbnail(`https://api.screenshotone.com/take?access_key=DEMO&url=${encodeURIComponent(firstBookmarkUrl)}&viewport_width=800&viewport_height=600&device_scale_factor=1&format=jpg&block_ads=true&block_trackers=true&cache_ttl=2592000`);
+      } catch (error) {
+        console.error('Invalid URL:', error);
+        setFolderThumbnail(null);
+      }
+    }
+  }, [bookmarks]);
 
   const getFolderIcon = (title: string) => {
     const lowercaseTitle = title.toLowerCase();
@@ -78,11 +91,16 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     >
       <div className={view === "list" ? "flex flex-1" : ""}>
         <div className={`relative ${view === "list" ? "w-48" : "aspect-video"} overflow-hidden`}>
-          {thumbnailUrl ? (
+          {folderThumbnail ? (
             <img
-              src={thumbnailUrl}
+              src={folderThumbnail}
               alt={title}
               className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement!.className = `flex items-center justify-center h-full bg-gradient-to-br ${getBackgroundGradient(title)}`;
+                e.currentTarget.parentElement!.appendChild(getFolderIcon(title));
+              }}
             />
           ) : (
             <div className={`flex items-center justify-center h-full bg-gradient-to-br ${getBackgroundGradient(title)} transition-all duration-300 group-hover:opacity-80`}>
