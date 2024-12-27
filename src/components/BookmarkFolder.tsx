@@ -1,8 +1,9 @@
-import { Folder, ExternalLink, ChevronRight, Globe, Code, Newspaper, Share2, Copy, Check } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
+import { BookmarkItem } from "./BookmarkItem";
+import { FolderThumbnail } from "./FolderThumbnail";
 
 interface Bookmark {
   title: string;
@@ -37,22 +38,6 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     }
   }, [bookmarks]);
 
-  const getFolderIcon = (title: string) => {
-    const lowercaseTitle = title.toLowerCase();
-    if (lowercaseTitle.includes('development')) return <Code className="w-12 h-12 text-primary/60" />;
-    if (lowercaseTitle.includes('social')) return <Share2 className="w-12 h-12 text-primary/60" />;
-    if (lowercaseTitle.includes('news')) return <Newspaper className="w-12 h-12 text-primary/60" />;
-    return <Globe className="w-12 h-12 text-primary/60" />;
-  };
-
-  const getBackgroundGradient = (title: string) => {
-    const lowercaseTitle = title.toLowerCase();
-    if (lowercaseTitle.includes('development')) return 'from-blue-500/5 to-blue-500/10';
-    if (lowercaseTitle.includes('social')) return 'from-purple-500/5 to-purple-500/10';
-    if (lowercaseTitle.includes('news')) return 'from-orange-500/5 to-orange-500/10';
-    return 'from-gray-500/5 to-gray-500/10';
-  };
-
   const getFaviconUrl = (url: string) => {
     try {
       const domain = new URL(url).hostname;
@@ -86,25 +71,6 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     setIsExpanded((prev) => !prev);
   };
 
-  const renderThumbnail = () => {
-    if (folderThumbnail && !thumbnailError) {
-      return (
-        <img
-          src={folderThumbnail}
-          alt={title}
-          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-          onError={() => setThumbnailError(true)}
-        />
-      );
-    }
-    
-    return (
-      <div className={`flex items-center justify-center h-full bg-gradient-to-br ${getBackgroundGradient(title)} transition-all duration-300 group-hover:opacity-80`}>
-        {getFolderIcon(title)}
-      </div>
-    );
-  };
-
   return (
     <Card 
       className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
@@ -113,7 +79,11 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     >
       <div className={view === "list" ? "flex flex-1" : ""}>
         <div className={`relative ${view === "list" ? "w-48" : "aspect-video"} overflow-hidden`}>
-          {renderThumbnail()}
+          <FolderThumbnail 
+            title={title}
+            folderThumbnail={folderThumbnail}
+            thumbnailError={thumbnailError}
+          />
         </div>
         
         <div 
@@ -141,58 +111,17 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
       >
         <div className="overflow-hidden">
           <div className="p-4 space-y-2 border-t">
-            {bookmarks.map((bookmark, index) => {
-              const faviconUrl = getFaviconUrl(bookmark.url);
-              return (
-                <div
-                  key={index}
-                  className={`flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-muted animate-fade-in opacity-0 ${
-                    isExpanded ? "opacity-100" : ""
-                  }`}
-                  style={{ 
-                    animationDelay: `${index * 50}ms`,
-                    transition: 'opacity 0.3s ease-in-out',
-                    transitionDelay: `${index * 50}ms`
-                  }}
-                >
-                  <a
-                    href={bookmark.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm hover:text-primary transition-colors flex-1"
-                  >
-                    {faviconUrl ? (
-                      <img 
-                        src={faviconUrl} 
-                        alt="" 
-                        className="w-4 h-4"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <ExternalLink className="w-4 h-4" />
-                    )}
-                    {bookmark.title}
-                  </a>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCopyUrl(bookmark.url, bookmark.title);
-                    }}
-                  >
-                    {copiedStates[bookmark.url] ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              );
-            })}
+            {bookmarks.map((bookmark, index) => (
+              <BookmarkItem
+                key={index}
+                bookmark={bookmark}
+                index={index}
+                isExpanded={isExpanded}
+                copiedStates={copiedStates}
+                handleCopyUrl={handleCopyUrl}
+                getFaviconUrl={getFaviconUrl}
+              />
+            ))}
           </div>
         </div>
       </div>
