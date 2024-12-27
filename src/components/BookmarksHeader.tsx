@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { ViewToggle } from "./ViewToggle";
 import { ThemeToggle } from "./ThemeToggle";
+import { CreateFolderDialog } from "./CreateFolderDialog";
 
 interface BookmarksHeaderProps {
   searchQuery: string;
@@ -63,6 +64,7 @@ export function BookmarksHeader({
           </SelectContent>
         </Select>
         <ViewToggle view={view} onViewChange={onViewChange} />
+        <CreateFolderDialog onFolderCreate={() => {}} />
       </div>
     </header>
   );
