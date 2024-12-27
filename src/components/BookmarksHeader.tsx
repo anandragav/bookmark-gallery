@@ -29,12 +29,12 @@ export function BookmarksHeader({
 }: BookmarksHeaderProps) {
   return (
     <header className="mb-16">
-      <div className="flex justify-end mb-4">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-4xl font-bold">
+          Better Bookmarks
+        </h1>
         <ThemeToggle />
       </div>
-      <h1 className="text-4xl font-bold text-left mb-4">
-        Better Bookmarks
-      </h1>
       <p className="text-lg text-muted-foreground mb-8 text-left">
         Your bookmarks, beautifully organized in an elegant gallery view
       </p>
