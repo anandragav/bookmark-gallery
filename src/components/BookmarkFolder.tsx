@@ -20,6 +20,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
   const [isExpanded, setIsExpanded] = useState(false);
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
   const [folderThumbnail, setFolderThumbnail] = useState<string | null>(null);
+  const [thumbnailError, setThumbnailError] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -27,9 +28,11 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
       try {
         const firstBookmarkUrl = new URL(bookmarks[0].url).toString();
         setFolderThumbnail(`https://api.screenshotone.com/take?access_key=DEMO&url=${encodeURIComponent(firstBookmarkUrl)}&viewport_width=800&viewport_height=600&device_scale_factor=1&format=jpg&block_ads=true&block_trackers=true&cache_ttl=2592000`);
+        setThumbnailError(false);
       } catch (error) {
         console.error('Invalid URL:', error);
         setFolderThumbnail(null);
+        setThumbnailError(true);
       }
     }
   }, [bookmarks]);
@@ -83,6 +86,25 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     setIsExpanded((prev) => !prev);
   };
 
+  const renderThumbnail = () => {
+    if (folderThumbnail && !thumbnailError) {
+      return (
+        <img
+          src={folderThumbnail}
+          alt={title}
+          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+          onError={() => setThumbnailError(true)}
+        />
+      );
+    }
+    
+    return (
+      <div className={`flex items-center justify-center h-full bg-gradient-to-br ${getBackgroundGradient(title)} transition-all duration-300 group-hover:opacity-80`}>
+        {getFolderIcon(title)}
+      </div>
+    );
+  };
+
   return (
     <Card 
       className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
@@ -91,22 +113,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     >
       <div className={view === "list" ? "flex flex-1" : ""}>
         <div className={`relative ${view === "list" ? "w-48" : "aspect-video"} overflow-hidden`}>
-          {folderThumbnail ? (
-            <img
-              src={folderThumbnail}
-              alt={title}
-              className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.parentElement!.className = `flex items-center justify-center h-full bg-gradient-to-br ${getBackgroundGradient(title)}`;
-                e.currentTarget.parentElement!.appendChild(getFolderIcon(title));
-              }}
-            />
-          ) : (
-            <div className={`flex items-center justify-center h-full bg-gradient-to-br ${getBackgroundGradient(title)} transition-all duration-300 group-hover:opacity-80`}>
-              {getFolderIcon(title)}
-            </div>
-          )}
+          {renderThumbnail()}
         </div>
         
         <div 
@@ -153,8 +160,7 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
                       alt="" 
                       className="w-4 h-4"
                       onError={(e) => {
-                        e.currentTarget.src = '';
-                        e.currentTarget.className = 'hidden';
+                        e.currentTarget.style.display = 'none';
                       }}
                     />
                   ) : (
