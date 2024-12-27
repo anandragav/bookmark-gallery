@@ -2,8 +2,14 @@
   "manifest_version": 3,
   "name": "Bookmark Gallery",
   "version": "1.0.0",
-  "description": "A beautiful gallery view for your browser bookmarks",
-  "permissions": ["bookmarks"],
+  "description": "A beautiful gallery view for your Chrome bookmarks",
+  "permissions": [
+    "bookmarks",
+    "storage"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval' 'unsafe-inline' https://cdn.gpteng.co; object-src 'self'"
+  },
   "action": {
     "default_popup": "index.html",
     "default_icon": {
