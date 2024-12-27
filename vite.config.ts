@@ -22,6 +22,8 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: true,
+    // Ensure manifest and other assets are copied
+    copyPublicDir: true,
   },
   publicDir: 'public',
   resolve: {
