@@ -1,108 +1,36 @@
-import { useState, useRef, useEffect } from "react";
-import { BookmarksHeader } from "@/components/BookmarksHeader";
-import { BookmarksGrid } from "@/components/BookmarksGrid";
-import { QuickAccess } from "@/components/QuickAccess";
-import { useBookmarks } from "@/hooks/useBookmarks";
-import { useHotkeys } from "react-hotkeys-hook";
-
-type SortOption = "alphabetical" | "bookmarkCount" | "recent";
-type ViewMode = "grid" | "list";
-
-const ITEMS_PER_PAGE = 9;
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const Index = () => {
-  const { folders, isLoading, quickAccessBookmarks } = useBookmarks();
-  const [displayedFolders, setDisplayedFolders] = useState(folders);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortOption, setSortOption] = useState<SortOption>("alphabetical");
-  const [view, setView] = useState<ViewMode>("grid");
-  const [page, setPage] = useState(1);
-  const loadingRef = useRef(null);
-
-  useHotkeys('ctrl+f', (e) => {
-    e.preventDefault();
-    document.querySelector<HTMLInputElement>('input[type="text"]')?.focus();
-  });
-  useHotkeys('g', () => setView('grid'));
-  useHotkeys('l', () => setView('list'));
-  useHotkeys('esc', () => setSearchQuery(''));
-
-  const handleCreateFolder = (folderName: string) => {
-    const newFolder = {
-      title: folderName,
-      bookmarks: [],
-    };
-    setDisplayedFolders((prev) => [...prev, newFolder]);
-  };
-
-  // Filter and sort folders
-  useEffect(() => {
-    const filteredFolders = folders.filter((folder) => {
-      const folderMatchesSearch = folder.title.toLowerCase().includes(searchQuery.toLowerCase());
-      const bookmarksMatchSearch = folder.bookmarks.some(
-        (bookmark) =>
-          bookmark.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          bookmark.url.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      return folderMatchesSearch || bookmarksMatchSearch;
-    });
-
-    const sortedFolders = [...filteredFolders].sort((a, b) => {
-      switch (sortOption) {
-        case "alphabetical":
-          return a.title.localeCompare(b.title);
-        case "bookmarkCount":
-          return b.bookmarks.length - a.bookmarks.length;
-        case "recent":
-          return b.title.localeCompare(a.title);
-        default:
-          return 0;
-      }
-    });
-
-    setDisplayedFolders(sortedFolders.slice(0, page * ITEMS_PER_PAGE));
-  }, [folders, searchQuery, sortOption, page]);
-
-  // Infinite scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && displayedFolders.length < folders.length) {
-          setPage((prevPage) => prevPage + 1);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    if (loadingRef.current) {
-      observer.observe(loadingRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [displayedFolders.length, folders.length]);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 dark:from-background dark:to-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <BookmarksHeader
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          sortOption={sortOption}
-          onSortChange={(value) => setSortOption(value as SortOption)}
-          view={view}
-          onViewChange={setView}
-        />
-        <QuickAccess bookmarks={quickAccessBookmarks} />
-        <BookmarksGrid 
-          folders={displayedFolders} 
-          view={view} 
-          isLoading={isLoading}
-        />
-        {!isLoading && displayedFolders.length < folders.length && (
-          <div ref={loadingRef} className="h-20 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    <div className="w-full h-full">
+      <Dialog>
+        <DialogContent aria-describedby="dialog-description">
+          <DialogHeader>
+            <DialogTitle>Dialog Title</DialogTitle>
+            <DialogDescription id="dialog-description">
+              This is the dialog description that explains the dialog's purpose.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-4">
+            <p>Dialog content goes here</p>
           </div>
-        )}
+        </DialogContent>
+      </Dialog>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">Bookmark Gallery</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Bookmark cards would go here */}
+        </div>
       </div>
     </div>
   );
