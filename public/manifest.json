@@ -11,15 +11,12 @@
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; img-src 'self' https://* data:;"
   },
   "action": {
-    "default_title": "Bookmark Gallery",
+    "default_popup": "index.html",
     "default_icon": {
       "16": "icon16.png",
       "48": "icon48.png",
       "128": "icon128.png"
     }
-  },
-  "chrome_url_overrides": {
-    "newtab": "index.html"
   },
   "icons": {
     "16": "icon16.png",
