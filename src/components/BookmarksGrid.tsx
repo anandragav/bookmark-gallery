@@ -16,10 +16,9 @@ interface BookmarksGridProps {
   folders: ProcessedFolder[];
   view: "grid" | "list";
   isLoading?: boolean;
-  onBookmarkAdd?: (folderTitle: string, url: string, title: string) => void;
 }
 
-export function BookmarksGrid({ folders, view, isLoading, onBookmarkAdd }: BookmarksGridProps) {
+export function BookmarksGrid({ folders, view, isLoading }: BookmarksGridProps) {
   if (isLoading) {
     return (
       <div className={view === "grid" 
@@ -45,7 +44,6 @@ export function BookmarksGrid({ folders, view, isLoading, onBookmarkAdd }: Bookm
             bookmarks={folder.bookmarks}
             thumbnailUrl={folder.thumbnailUrl}
             view={view}
-            onBookmarkAdd={onBookmarkAdd}
           />
         </div>
       ))}
