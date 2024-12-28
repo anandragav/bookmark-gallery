@@ -62,6 +62,50 @@ export function useBookmarks() {
     }
   }, [folders, fetchBookmarks, toast]);
 
+  const createFolder = useCallback(async (folderName: string) => {
+    console.log('Creating folder:', folderName);
+    try {
+      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+        await new Promise<void>((resolve, reject) => {
+          chrome.bookmarks.create(
+            { 
+              parentId: '1',  // '1' is typically the "Bookmarks Bar" folder
+              title: folderName 
+            },
+            (result) => {
+              if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+              } else {
+                resolve();
+              }
+            }
+          );
+        });
+      } else {
+        // Development mode: just add a new empty folder
+        setFolders(current => [
+          ...current,
+          {
+            title: folderName,
+            bookmarks: []
+          }
+        ]);
+      }
+      toast({
+        title: "Success",
+        description: "Folder created successfully",
+      });
+      await fetchBookmarks();
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create folder. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [fetchBookmarks, toast]);
+
   useEffect(() => {
     fetchBookmarks();
   }, [fetchBookmarks]);
@@ -72,5 +116,6 @@ export function useBookmarks() {
     quickAccessBookmarks,
     refreshBookmarks: fetchBookmarks,
     createBookmark,
+    createFolder
   };
 }

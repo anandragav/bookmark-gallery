@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { BookmarksHeader } from "@/components/BookmarksHeader";
 import { BookmarksGrid } from "@/components/BookmarksGrid";
@@ -15,16 +15,6 @@ const Index = () => {
     createFolder,
     createBookmark 
   } = useBookmarks();
-
-  const handleFolderCreate = useCallback((folderName: string) => {
-    console.log('Creating folder:', folderName);
-    createFolder(folderName);
-  }, [createFolder]);
-
-  const handleBookmarkAdd = useCallback((folderTitle: string, url: string, title: string) => {
-    console.log('Adding bookmark:', { folderTitle, url, title });
-    createBookmark(folderTitle, url, title);
-  }, [createBookmark]);
 
   const filteredFolders = folders.filter((folder) =>
     folder.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -56,14 +46,14 @@ const Index = () => {
         onSortChange={setSortOption}
         view={view}
         onViewChange={setView}
-        onFolderCreate={handleFolderCreate}
+        onFolderCreate={createFolder}
       />
       <QuickAccess bookmarks={quickAccessBookmarks} />
       <BookmarksGrid 
         folders={sortedFolders} 
         view={view} 
         isLoading={isLoading}
-        onBookmarkAdd={handleBookmarkAdd}
+        onBookmarkAdd={createBookmark}
       />
     </div>
   );
