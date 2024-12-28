@@ -9,7 +9,7 @@
     "tabs"
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; img-src 'self' https://* data:;"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval' https://cdn.gpteng.co; object-src 'self'; img-src 'self' https://* data:;"
   },
   "action": {},
   "background": {
