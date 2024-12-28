@@ -13,6 +13,38 @@ interface ProcessedFolder {
   bookmarks: Bookmark[];
 }
 
+// Initial data to populate when no bookmarks exist
+const initialFolders: ProcessedFolder[] = [
+  {
+    id: "1",
+    title: "Development",
+    bookmarks: [
+      {
+        title: "GitHub",
+        url: "https://github.com"
+      },
+      {
+        title: "Stack Overflow",
+        url: "https://stackoverflow.com"
+      }
+    ]
+  },
+  {
+    id: "2",
+    title: "Social Media",
+    bookmarks: [
+      {
+        title: "Twitter",
+        url: "https://twitter.com"
+      },
+      {
+        title: "LinkedIn",
+        url: "https://linkedin.com"
+      }
+    ]
+  }
+];
+
 export function useBookmarks() {
   const [folders, setFolders] = useState<ProcessedFolder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,6 +56,10 @@ export function useBookmarks() {
     const savedFolders = localStorage.getItem('bookmarkFolders');
     if (savedFolders) {
       setFolders(JSON.parse(savedFolders));
+    } else {
+      // Initialize with default folders if no data exists
+      setFolders(initialFolders);
+      localStorage.setItem('bookmarkFolders', JSON.stringify(initialFolders));
     }
     setIsLoading(false);
   }, []);
