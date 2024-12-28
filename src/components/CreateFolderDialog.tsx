@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { FolderPlus } from "lucide-react";
@@ -46,6 +47,9 @@ export function CreateFolderDialog({ onFolderCreate }: CreateFolderDialogProps) 
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Folder</DialogTitle>
+          <DialogDescription>
+            Enter a name for your new bookmark folder.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <Input
