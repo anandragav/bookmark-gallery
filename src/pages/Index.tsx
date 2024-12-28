@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { BookmarksHeader } from "@/components/BookmarksHeader";
 import { BookmarksGrid } from "@/components/BookmarksGrid";
@@ -8,9 +8,14 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("alphabetical");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const { folders, isLoading, quickAccessBookmarks } = useBookmarks();
+  const { folders, isLoading, quickAccessBookmarks, refreshBookmarks } = useBookmarks();
 
   console.log('Index rendering, folders:', folders); // Debug log
+
+  const handleFolderCreate = useCallback((folderName: string) => {
+    console.log('Folder created:', folderName);
+    refreshBookmarks();
+  }, [refreshBookmarks]);
 
   const filteredFolders = folders.filter((folder) =>
     folder.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -42,6 +47,7 @@ const Index = () => {
         onSortChange={setSortOption}
         view={view}
         onViewChange={setView}
+        onFolderCreate={handleFolderCreate}
       />
       <QuickAccess bookmarks={quickAccessBookmarks} />
       <BookmarksGrid 

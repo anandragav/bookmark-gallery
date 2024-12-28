@@ -18,6 +18,7 @@ interface BookmarksHeaderProps {
   onSortChange: (value: string) => void;
   view: "grid" | "list";
   onViewChange: (view: "grid" | "list") => void;
+  onFolderCreate: (folderName: string) => void;
 }
 
 export function BookmarksHeader({
@@ -27,6 +28,7 @@ export function BookmarksHeader({
   onSortChange,
   view,
   onViewChange,
+  onFolderCreate,
 }: BookmarksHeaderProps) {
   return (
     <header className="mb-16">
@@ -64,7 +66,7 @@ export function BookmarksHeader({
           </SelectContent>
         </Select>
         <ViewToggle view={view} onViewChange={onViewChange} />
-        <CreateFolderDialog onFolderCreate={() => {}} />
+        <CreateFolderDialog onFolderCreate={onFolderCreate} />
       </div>
     </header>
   );
