@@ -1,5 +1,3 @@
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -10,6 +8,8 @@ import {
 import { ViewToggle } from "./ViewToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { CreateFolderDialog } from "./CreateFolderDialog";
+import { BookmarkSearch } from "./BookmarkSearch";
+import { Bookmark } from "@/types/bookmark.types";
 
 interface BookmarksHeaderProps {
   searchQuery: string;
@@ -19,6 +19,8 @@ interface BookmarksHeaderProps {
   view: "grid" | "list";
   onViewChange: (view: "grid" | "list") => void;
   onFolderCreate: (folderName: string) => void;
+  folders: { title: string; bookmarks: Bookmark[] }[];
+  onSmartSearchResults: (results: any[]) => void;
 }
 
 export function BookmarksHeader({
@@ -29,6 +31,8 @@ export function BookmarksHeader({
   view,
   onViewChange,
   onFolderCreate,
+  folders,
+  onSmartSearchResults,
 }: BookmarksHeaderProps) {
   return (
     <header className="mb-16">
@@ -42,16 +46,12 @@ export function BookmarksHeader({
         Your bookmarks, beautifully organized in an elegant gallery view
       </p>
       <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            type="text"
-            placeholder="Search bookmarks..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        <BookmarkSearch
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
+          folders={folders}
+          onSmartSearchResults={onSmartSearchResults}
+        />
         <Select
           value={sortOption}
           onValueChange={onSortChange}

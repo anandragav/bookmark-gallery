@@ -11,7 +11,11 @@ export interface ProcessedFolder {
 
 export interface ChromeBookmark {
   id: string;
-  title: string;
+  parentId?: string;
+  index?: number;
   url?: string;
+  title: string;
+  dateAdded?: number;
+  dateGroupModified?: number;
   children?: ChromeBookmark[];
 }

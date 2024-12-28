@@ -21,13 +21,28 @@ const Index = () => {
     createFolder(folderName);
   }, [createFolder]);
 
-  const filteredFolders = folders.filter((folder) =>
-    folder.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    folder.bookmarks.some((bookmark) =>
-      bookmark.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      bookmark.url.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  const [smartSearchResults, setSmartSearchResults] = useState<any[]>([]);
+
+  const filteredFolders = searchQuery && smartSearchResults.length > 0
+    ? smartSearchResults.reduce((acc: any[], result) => {
+        const folderIndex = acc.findIndex(f => f.title === result.folderTitle);
+        if (folderIndex === -1) {
+          acc.push({
+            title: result.folderTitle,
+            bookmarks: [{ title: result.title, url: result.url }]
+          });
+        } else {
+          acc[folderIndex].bookmarks.push({ title: result.title, url: result.url });
+        }
+        return acc;
+      }, [])
+    : folders.filter((folder) =>
+        folder.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        folder.bookmarks.some((bookmark) =>
+          bookmark.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          bookmark.url.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
 
   const sortedFolders = [...filteredFolders].sort((a, b) => {
     switch (sortOption) {
@@ -52,6 +67,8 @@ const Index = () => {
         view={view}
         onViewChange={setView}
         onFolderCreate={handleFolderCreate}
+        folders={folders}
+        onSmartSearchResults={setSmartSearchResults}
       />
       <QuickAccess bookmarks={quickAccessBookmarks} />
       <BookmarksGrid 
