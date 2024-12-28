@@ -1,34 +1,25 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { componentTagger } from "lovable-tagger";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
 
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
   },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
   build: {
     rollupOptions: {
       input: {
-        index: path.resolve(__dirname, 'index.html'),
+        main: path.resolve(__dirname, 'index.html'),
       },
-    },
-    outDir: 'dist',
-    emptyOutDir: true,
-    sourcemap: true,
-    // Ensure manifest and other assets are copied
-    copyPublicDir: true,
+      output: {
+        entryFileNames: `assets/[name].js`,
+        chunkFileNames: `assets/[name].js`,
+        assetFileNames: `assets/[name].[ext]`
+      }
+    }
   },
-  publicDir: 'public',
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-}));
+  base: './'
+})
