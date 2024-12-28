@@ -26,14 +26,13 @@ export function useBookmarks() {
   const { toast } = useToast();
 
   const processBookmarks = useCallback((bookmarks: ChromeBookmark[]) => {
-    console.log('Processing bookmarks:', bookmarks); // Debug log
+    console.log('Processing bookmarks:', bookmarks);
     const processedFolders: ProcessedFolder[] = [];
     const frequentBookmarks: Bookmark[] = [];
 
     const processNode = (node: ChromeBookmark) => {
-      console.log('Processing node:', node.title); // Debug log
+      console.log('Processing node:', node.title);
       
-      // Skip special Chrome folders
       if (node.title === 'Other Bookmarks' || node.title === 'Synced Bookmarks') {
         console.log('Skipping special folder:', node.title);
         return;
@@ -47,17 +46,13 @@ export function useBookmarks() {
             url: child.url!,
           }));
 
-        if (bookmarks.length > 0) {
-          console.log('Found folder with bookmarks:', node.title, bookmarks.length);
-          processedFolders.push({
-            title: node.title,
-            bookmarks,
-          });
-          
-          // Add first bookmark from each folder to quick access
-          if (frequentBookmarks.length < 6) {
-            frequentBookmarks.push(bookmarks[0]);
-          }
+        processedFolders.push({
+          title: node.title,
+          bookmarks,
+        });
+        
+        if (frequentBookmarks.length < 6 && bookmarks.length > 0) {
+          frequentBookmarks.push(bookmarks[0]);
         }
       }
 
@@ -74,11 +69,11 @@ export function useBookmarks() {
   const fetchBookmarks = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log('Checking Chrome API availability...'); // Debug log
+      console.log('Checking Chrome API availability...');
       if (typeof chrome !== 'undefined' && chrome.bookmarks) {
         console.log('Chrome Bookmarks API is available');
         chrome.bookmarks.getTree((bookmarkTreeNodes) => {
-          console.log('Got bookmark tree:', bookmarkTreeNodes); // Debug log
+          console.log('Got bookmark tree:', bookmarkTreeNodes);
           if (chrome.runtime.lastError) {
             console.error('Chrome API error:', chrome.runtime.lastError);
             toast({
@@ -95,27 +90,32 @@ export function useBookmarks() {
         });
       } else {
         console.log('Using development sample data');
-        // Sample data for development
-        const sampleFolders: ProcessedFolder[] = [
-          {
-            title: "Development Resources",
-            bookmarks: [
-              { title: "GitHub", url: "https://github.com" },
-              { title: "Stack Overflow", url: "https://stackoverflow.com" },
-              { title: "MDN Web Docs", url: "https://developer.mozilla.org" },
-            ],
-          },
-          {
-            title: "Social Media",
-            bookmarks: [
-              { title: "Twitter", url: "https://twitter.com" },
-              { title: "LinkedIn", url: "https://linkedin.com" },
-              { title: "Facebook", url: "https://facebook.com" },
-            ],
-          },
-        ];
-        setFolders(sampleFolders);
-        setQuickAccessBookmarks(sampleFolders[0].bookmarks.slice(0, 3));
+        // For development environment, add the new folder to the existing folders
+        setFolders((currentFolders) => {
+          const sampleFolders: ProcessedFolder[] = currentFolders.length > 0 ? currentFolders : [
+            {
+              title: "Development Resources",
+              bookmarks: [
+                { title: "GitHub", url: "https://github.com" },
+                { title: "Stack Overflow", url: "https://stackoverflow.com" },
+                { title: "MDN Web Docs", url: "https://developer.mozilla.org" },
+              ],
+            },
+            {
+              title: "Social Media",
+              bookmarks: [
+                { title: "Twitter", url: "https://twitter.com" },
+                { title: "LinkedIn", url: "https://linkedin.com" },
+                { title: "Facebook", url: "https://facebook.com" },
+              ],
+            },
+          ];
+          return sampleFolders;
+        });
+        setQuickAccessBookmarks([
+          { title: "GitHub", url: "https://github.com" },
+          { title: "Twitter", url: "https://twitter.com" },
+        ]);
         setTimeout(() => setIsLoading(false), 1000);
       }
     } catch (error) {
@@ -129,6 +129,47 @@ export function useBookmarks() {
     }
   }, [processBookmarks, toast]);
 
+  const createFolder = useCallback((folderName: string) => {
+    console.log('Creating folder:', folderName);
+    if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+      chrome.bookmarks.create(
+        { 
+          parentId: "1",
+          title: folderName.trim() 
+        },
+        (result) => {
+          if (chrome.runtime.lastError) {
+            toast({
+              title: "Error",
+              description: "Failed to create folder: " + chrome.runtime.lastError.message,
+              variant: "destructive",
+            });
+          } else {
+            // Refresh bookmarks after creating folder
+            fetchBookmarks();
+            toast({
+              title: "Success",
+              description: "Folder created successfully",
+            });
+          }
+        }
+      );
+    } else {
+      // For development environment
+      setFolders((currentFolders) => [
+        ...currentFolders,
+        {
+          title: folderName,
+          bookmarks: [],
+        },
+      ]);
+      toast({
+        title: "Success",
+        description: "Folder created successfully (Development mode)",
+      });
+    }
+  }, [fetchBookmarks, toast]);
+
   useEffect(() => {
     fetchBookmarks();
   }, [fetchBookmarks]);
@@ -137,6 +178,7 @@ export function useBookmarks() {
     folders,
     isLoading,
     quickAccessBookmarks,
-    refreshBookmarks: fetchBookmarks
+    refreshBookmarks: fetchBookmarks,
+    createFolder,
   };
 }

@@ -8,14 +8,14 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("alphabetical");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const { folders, isLoading, quickAccessBookmarks, refreshBookmarks } = useBookmarks();
+  const { folders, isLoading, quickAccessBookmarks, createFolder } = useBookmarks();
 
-  console.log('Index rendering, folders:', folders); // Debug log
+  console.log('Index rendering, folders:', folders);
 
   const handleFolderCreate = useCallback((folderName: string) => {
-    console.log('Folder created:', folderName);
-    refreshBookmarks();
-  }, [refreshBookmarks]);
+    console.log('Creating folder:', folderName);
+    createFolder(folderName);
+  }, [createFolder]);
 
   const filteredFolders = folders.filter((folder) =>
     folder.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -32,7 +32,7 @@ const Index = () => {
       case "bookmarkCount":
         return b.bookmarks.length - a.bookmarks.length;
       case "recent":
-        return 0; // Implement when we have timestamp data
+        return 0;
       default:
         return 0;
     }
