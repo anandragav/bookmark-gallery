@@ -1,7 +1,12 @@
 import { useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { ProcessedFolder, Bookmark } from "@/types/bookmark.types";
-import { getChromeBookmarks, removeBookmark as removeBookmarkApi, moveBookmark as moveBookmarkApi } from "@/utils/chrome-api.utils";
+import { 
+  getChromeBookmarks, 
+  removeBookmark as removeBookmarkApi, 
+  moveBookmark as moveBookmarkApi,
+  deleteFolder as deleteFolderApi 
+} from "@/utils/chrome-api.utils";
 import { processBookmarks, getSampleData } from "@/utils/bookmark-processor.utils";
 import { useBookmarksState } from "./useBookmarksState";
 import { useBookmarkOperations } from "./useBookmarkOperations";
@@ -89,6 +94,34 @@ export function useBookmarks() {
     }
   }, [fetchBookmarks, setFolders, toast]);
 
+  const deleteFolder = useCallback(async (folderTitle: string) => {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+        await deleteFolderApi(folderTitle);
+        await fetchBookmarks();
+        toast({
+          title: "Success",
+          description: "Folder deleted successfully",
+        });
+      } else {
+        setFolders((currentFolders) => 
+          currentFolders.filter((folder) => folder.title !== folderTitle)
+        );
+        toast({
+          title: "Success",
+          description: "Folder deleted successfully (Development mode)",
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting folder:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete folder. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [fetchBookmarks, setFolders, toast]);
+
   const moveBookmark = useCallback(async (url: string, fromFolder: string, toFolder: string) => {
     try {
       if (typeof chrome !== 'undefined' && chrome.bookmarks) {
@@ -146,5 +179,6 @@ export function useBookmarks() {
     createBookmark,
     removeBookmark,
     moveBookmark,
+    deleteFolder,
   };
 }

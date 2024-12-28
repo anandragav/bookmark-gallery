@@ -1,9 +1,21 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { BookmarkItem } from "./BookmarkItem";
 import { FolderThumbnail } from "./FolderThumbnail";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Bookmark } from "@/types/bookmark.types";
 
 interface BookmarkFolderProps {
@@ -13,6 +25,7 @@ interface BookmarkFolderProps {
   view: "grid" | "list";
   onRemoveBookmark: (url: string, folderTitle: string) => void;
   onMoveBookmark: (url: string, fromFolder: string, toFolder: string) => void;
+  onDeleteFolder: (folderTitle: string) => void;
   availableFolders: string[];
 }
 
@@ -23,6 +36,7 @@ export function BookmarkFolder({
   view,
   onRemoveBookmark,
   onMoveBookmark,
+  onDeleteFolder,
   availableFolders
 }: BookmarkFolderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -99,20 +113,55 @@ export function BookmarkFolder({
         </div>
         
         <div 
-          className={`p-4 ${view === "list" ? "flex-1" : ""} cursor-pointer`}
-          onClick={handleToggle}
+          className={`p-4 ${view === "list" ? "flex-1" : ""}`}
         >
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-lg">{title}</h3>
-            <ChevronRight 
-              className={`w-5 h-5 transition-transform duration-300 ${
-                isExpanded ? "rotate-90" : "group-hover:translate-x-1"
-              }`}
-            />
+            <div 
+              className="flex-1 cursor-pointer"
+              onClick={handleToggle}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-lg">{title}</h3>
+                <ChevronRight 
+                  className={`w-5 h-5 transition-transform duration-300 ${
+                    isExpanded ? "rotate-90" : "group-hover:translate-x-1"
+                  }`}
+                />
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {bookmarks.length} bookmark{bookmarks.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-2 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Delete folder</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete folder</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete the folder "{title}" and all its bookmarks? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={() => onDeleteFolder(title)}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            {bookmarks.length} bookmark{bookmarks.length !== 1 ? 's' : ''}
-          </p>
         </div>
       </div>
 

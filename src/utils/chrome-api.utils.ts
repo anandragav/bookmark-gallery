@@ -109,6 +109,29 @@ export const removeBookmark = async (url: string, folderTitle: string): Promise<
   }
 };
 
+export const deleteFolder = async (folderTitle: string): Promise<void> => {
+  if (typeof chrome === 'undefined' || !chrome.bookmarks) {
+    console.log('Chrome API not available');
+    return;
+  }
+
+  try {
+    const folders = await new Promise<chrome.bookmarks.BookmarkTreeNode[]>((resolve) => {
+      chrome.bookmarks.search({ title: folderTitle }, (results) => resolve(results));
+    });
+
+    const folder = folders.find(f => !f.url); // folders don't have URLs
+    if (folder) {
+      await new Promise<void>((resolve) => {
+        chrome.bookmarks.removeTree(folder.id, () => resolve());
+      });
+    }
+  } catch (error) {
+    console.error('Error deleting folder:', error);
+    throw error;
+  }
+};
+
 export const moveBookmark = async (
   url: string,
   fromFolderTitle: string,

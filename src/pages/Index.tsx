@@ -15,7 +15,8 @@ const Index = () => {
     quickAccessBookmarks, 
     createFolder,
     removeBookmark,
-    moveBookmark 
+    moveBookmark,
+    deleteFolder
   } = useBookmarks();
 
   const handleFolderCreate = useCallback((folderName: string) => {
@@ -86,6 +87,7 @@ const Index = () => {
           isLoading={isLoading}
           onRemoveBookmark={removeBookmark}
           onMoveBookmark={moveBookmark}
+          onDeleteFolder={deleteFolder}
           availableFolders={folders.map(f => f.title)}
         />
       </div>

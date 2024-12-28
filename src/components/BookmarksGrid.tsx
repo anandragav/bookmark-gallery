@@ -18,6 +18,7 @@ interface BookmarksGridProps {
   isLoading?: boolean;
   onRemoveBookmark: (url: string, folderTitle: string) => void;
   onMoveBookmark: (url: string, fromFolder: string, toFolder: string) => void;
+  onDeleteFolder: (folderTitle: string) => void;
   availableFolders: string[];
 }
 
@@ -27,6 +28,7 @@ export function BookmarksGrid({
   isLoading,
   onRemoveBookmark,
   onMoveBookmark,
+  onDeleteFolder,
   availableFolders
 }: BookmarksGridProps) {
   if (isLoading) {
@@ -56,6 +58,7 @@ export function BookmarksGrid({
             view={view}
             onRemoveBookmark={onRemoveBookmark}
             onMoveBookmark={onMoveBookmark}
+            onDeleteFolder={onDeleteFolder}
             availableFolders={availableFolders}
           />
         </div>
