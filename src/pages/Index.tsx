@@ -14,7 +14,9 @@ const Index = () => {
     quickAccessBookmarks, 
     createFolder,
     removeBookmark,
-    moveBookmark 
+    moveBookmark,
+    autoOrganize,
+    isAutoOrganizing
   } = useBookmarks();
 
   const handleFolderCreate = useCallback((folderName: string) => {
@@ -69,6 +71,8 @@ const Index = () => {
         onFolderCreate={handleFolderCreate}
         folders={folders}
         onSmartSearchResults={setSmartSearchResults}
+        onAutoOrganize={autoOrganize}
+        isAutoOrganizing={isAutoOrganizing}
       />
       <QuickAccess bookmarks={quickAccessBookmarks} />
       <BookmarksGrid 
