@@ -1,25 +1,26 @@
-import { Input } from "@/components/ui/input";
-import { Search, Wand2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { LayoutGrid, List } from "lucide-react";
-import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ViewToggle } from "./ViewToggle";
+import { ThemeToggle } from "./ThemeToggle";
+import { CreateFolderDialog } from "./CreateFolderDialog";
+import { BookmarkSearch } from "./BookmarkSearch";
+import { Bookmark } from "@/types/bookmark.types";
 
 interface BookmarksHeaderProps {
   searchQuery: string;
-  onSearchChange: (query: string) => void;
+  onSearchChange: (value: string) => void;
   sortOption: string;
-  onSortChange: (option: string) => void;
+  onSortChange: (value: string) => void;
   view: "grid" | "list";
   onViewChange: (view: "grid" | "list") => void;
-  onFolderCreate: (name: string) => void;
-  folders: any[];
+  onFolderCreate: (folderName: string) => void;
+  folders: { title: string; bookmarks: Bookmark[] }[];
   onSmartSearchResults: (results: any[]) => void;
-  onAutoOrganize: () => void;
-  isAutoOrganizing: boolean;
 }
 
 export function BookmarksHeader({
@@ -32,103 +33,41 @@ export function BookmarksHeader({
   onFolderCreate,
   folders,
   onSmartSearchResults,
-  onAutoOrganize,
-  isAutoOrganizing
 }: BookmarksHeaderProps) {
-  const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
-  const [newFolderName, setNewFolderName] = useState("");
-
-  const handleCreateFolder = () => {
-    if (newFolderName.trim()) {
-      onFolderCreate(newFolderName.trim());
-      setNewFolderName("");
-      setIsCreateFolderOpen(false);
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-4 mb-8">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex-1 min-w-[280px] relative">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            placeholder="Search bookmarks..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <Select value={sortOption} onValueChange={onSortChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="alphabetical">Alphabetical</SelectItem>
-              <SelectItem value="bookmarkCount">Bookmark Count</SelectItem>
-              <SelectItem value="recent">Recently Added</SelectItem>
-            </SelectContent>
-          </Select>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => onViewChange(view === "grid" ? "list" : "grid")}
-              >
-                {view === "grid" ? <List className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Toggle view</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
+    <header className="mb-16">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-4xl font-bold">
+          Better Bookmarks
+        </h1>
+        <ThemeToggle />
       </div>
-      <div className="flex items-center gap-2 justify-between">
-        <Dialog open={isCreateFolderOpen} onOpenChange={setIsCreateFolderOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline">Create Folder</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Folder</DialogTitle>
-              <DialogDescription>
-                Enter a name for your new bookmark folder.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Folder name</Label>
-                <Input
-                  id="name"
-                  value={newFolderName}
-                  onChange={(e) => setNewFolderName(e.target.value)}
-                  placeholder="My Folder"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={handleCreateFolder}>Create</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="outline"
-              onClick={onAutoOrganize}
-              disabled={isAutoOrganizing}
-            >
-              <Wand2 className="mr-2 h-4 w-4" />
-              Auto-organize
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Automatically organize bookmarks using AI</p>
-          </TooltipContent>
-        </Tooltip>
+      <p className="text-lg text-muted-foreground mb-8 text-left">
+        Your bookmarks, beautifully organized in an elegant gallery view
+      </p>
+      <div className="flex items-center gap-4">
+        <BookmarkSearch
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
+          folders={folders}
+          onSmartSearchResults={onSmartSearchResults}
+        />
+        <Select
+          value={sortOption}
+          onValueChange={onSortChange}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="alphabetical">Alphabetical</SelectItem>
+            <SelectItem value="bookmarkCount">Bookmark Count</SelectItem>
+            <SelectItem value="recent">Most Recent</SelectItem>
+          </SelectContent>
+        </Select>
+        <ViewToggle view={view} onViewChange={onViewChange} />
+        <CreateFolderDialog onFolderCreate={onFolderCreate} />
       </div>
-    </div>
+    </header>
   );
 }

@@ -3,7 +3,6 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 import { BookmarksHeader } from "@/components/BookmarksHeader";
 import { BookmarksGrid } from "@/components/BookmarksGrid";
 import { QuickAccess } from "@/components/QuickAccess";
-import { AuroraBackground } from "@/components/ui/aurora-background";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,9 +14,7 @@ const Index = () => {
     quickAccessBookmarks, 
     createFolder,
     removeBookmark,
-    moveBookmark,
-    autoOrganize,
-    isAutoOrganizing
+    moveBookmark 
   } = useBookmarks();
 
   const handleFolderCreate = useCallback((folderName: string) => {
@@ -61,32 +58,28 @@ const Index = () => {
   });
 
   return (
-    <AuroraBackground>
-      <div className="container mx-auto px-4 py-8 relative z-10">
-        <BookmarksHeader
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          sortOption={sortOption}
-          onSortChange={setSortOption}
-          view={view}
-          onViewChange={setView}
-          onFolderCreate={handleFolderCreate}
-          folders={folders}
-          onSmartSearchResults={setSmartSearchResults}
-          onAutoOrganize={autoOrganize}
-          isAutoOrganizing={isAutoOrganizing}
-        />
-        <QuickAccess bookmarks={quickAccessBookmarks} />
-        <BookmarksGrid 
-          folders={sortedFolders} 
-          view={view} 
-          isLoading={isLoading}
-          onRemoveBookmark={removeBookmark}
-          onMoveBookmark={moveBookmark}
-          availableFolders={folders.map(f => f.title)}
-        />
-      </div>
-    </AuroraBackground>
+    <div className="container mx-auto px-4 py-8">
+      <BookmarksHeader
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        sortOption={sortOption}
+        onSortChange={setSortOption}
+        view={view}
+        onViewChange={setView}
+        onFolderCreate={handleFolderCreate}
+        folders={folders}
+        onSmartSearchResults={setSmartSearchResults}
+      />
+      <QuickAccess bookmarks={quickAccessBookmarks} />
+      <BookmarksGrid 
+        folders={sortedFolders} 
+        view={view} 
+        isLoading={isLoading}
+        onRemoveBookmark={removeBookmark}
+        onMoveBookmark={moveBookmark}
+        availableFolders={folders.map(f => f.title)}
+      />
+    </div>
   );
 };
 

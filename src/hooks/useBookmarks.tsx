@@ -1,21 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { ProcessedFolder, Bookmark } from "@/types/bookmark.types";
-import { 
-  getChromeBookmarks, 
-  createChromeFolder, 
-  createChromeBookmark, 
-  removeBookmark as removeChromeBoomark,
-  moveBookmark as moveChromeBoomark 
-} from "@/utils/chrome-api.utils";
+import { getChromeBookmarks, createChromeFolder, createChromeBookmark, removeBookmark, moveBookmark } from "@/utils/chrome-api.utils";
 import { processBookmarks, getSampleData } from "@/utils/bookmark-processor.utils";
-import { autoOrganizeBookmarks } from "@/utils/auto-organize";
 
 export function useBookmarks() {
   const [folders, setFolders] = useState<ProcessedFolder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [quickAccessBookmarks, setQuickAccessBookmarks] = useState<Bookmark[]>([]);
-  const [isAutoOrganizing, setIsAutoOrganizing] = useState(false);
   const { toast } = useToast();
 
   const fetchBookmarks = useCallback(async () => {
@@ -49,42 +41,6 @@ export function useBookmarks() {
       setIsLoading(false);
     }
   }, [toast]);
-
-  const autoOrganize = useCallback(async () => {
-    setIsAutoOrganizing(true);
-    try {
-      const allBookmarks = folders.flatMap(folder => folder.bookmarks);
-      const organizedFolders = await autoOrganizeBookmarks(allBookmarks);
-      
-      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-        // Create new folders and move bookmarks in Chrome
-        for (const folder of organizedFolders) {
-          const newFolder = await createChromeFolder(folder.title);
-          for (const bookmark of folder.bookmarks) {
-            await createChromeBookmark(newFolder.id, bookmark.url, bookmark.title);
-          }
-        }
-        await fetchBookmarks();
-      } else {
-        // In development mode, just update the state
-        setFolders(organizedFolders);
-      }
-
-      toast({
-        title: "Success",
-        description: "Bookmarks have been automatically organized",
-      });
-    } catch (error) {
-      console.error('Error auto-organizing bookmarks:', error);
-      toast({
-        title: "Error",
-        description: "Failed to auto-organize bookmarks. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsAutoOrganizing(false);
-    }
-  }, [folders, toast, fetchBookmarks]);
 
   const createFolder = useCallback(async (folderName: string) => {
     console.log('Creating folder:', folderName);
@@ -255,12 +211,10 @@ export function useBookmarks() {
     folders,
     isLoading,
     quickAccessBookmarks,
-    isAutoOrganizing,
     refreshBookmarks: fetchBookmarks,
     createFolder,
     createBookmark,
     removeBookmark,
     moveBookmark,
-    autoOrganize,
   };
 }
