@@ -7,6 +7,7 @@ interface Bookmark {
 }
 
 interface ProcessedFolder {
+  id: string;
   title: string;
   thumbnailUrl?: string;
   bookmarks: Bookmark[];
@@ -16,9 +17,15 @@ interface BookmarksGridProps {
   folders: ProcessedFolder[];
   view: "grid" | "list";
   isLoading?: boolean;
+  onBookmarkAdd?: (folderId: string, bookmark: Bookmark) => void;
 }
 
-export function BookmarksGrid({ folders, view, isLoading }: BookmarksGridProps) {
+export function BookmarksGrid({ 
+  folders, 
+  view, 
+  isLoading,
+  onBookmarkAdd
+}: BookmarksGridProps) {
   if (isLoading) {
     return (
       <div className={view === "grid" 
@@ -37,13 +44,15 @@ export function BookmarksGrid({ folders, view, isLoading }: BookmarksGridProps) 
       ? "grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4" 
       : "flex flex-col gap-4"
     }>
-      {folders.map((folder, index) => (
-        <div key={index} className="h-fit">
+      {folders.map((folder) => (
+        <div key={folder.id} className="h-fit">
           <BookmarkFolder
+            id={folder.id}
             title={folder.title}
             bookmarks={folder.bookmarks}
             thumbnailUrl={folder.thumbnailUrl}
             view={view}
+            onBookmarkAdd={onBookmarkAdd}
           />
         </div>
       ))}

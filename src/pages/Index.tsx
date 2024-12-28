@@ -1,18 +1,25 @@
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Sun, Search, FolderPlus } from "lucide-react";
+import { Sun, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ViewToggle } from "@/components/ViewToggle";
 import { BookmarksGrid } from "@/components/BookmarksGrid";
 import { QuickAccess } from "@/components/QuickAccess";
+import { CreateFolderDialog } from "@/components/CreateFolderDialog";
 import { useBookmarks } from "@/hooks/useBookmarks";
 
 const Index = () => {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
-  const { folders, isLoading, quickAccessBookmarks } = useBookmarks();
+  const { 
+    folders, 
+    isLoading, 
+    quickAccessBookmarks,
+    createFolder,
+    addBookmarkToFolder
+  } = useBookmarks();
 
   const filteredFolders = folders.filter(folder => 
     folder.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -54,10 +61,7 @@ const Index = () => {
               </div>
               <div className="flex items-center gap-4">
                 <ViewToggle view={view} onViewChange={setView} />
-                <Button>
-                  <FolderPlus className="mr-2 h-4 w-4" />
-                  New Folder
-                </Button>
+                <CreateFolderDialog onFolderCreate={createFolder} />
               </div>
             </div>
 
@@ -67,6 +71,7 @@ const Index = () => {
               folders={filteredFolders}
               view={view}
               isLoading={isLoading}
+              onBookmarkAdd={addBookmarkToFolder}
             />
           </div>
         </div>
