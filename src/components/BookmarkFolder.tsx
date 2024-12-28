@@ -5,19 +5,25 @@ import { useToast } from "@/components/ui/use-toast";
 import { BookmarkItem } from "./BookmarkItem";
 import { FolderThumbnail } from "./FolderThumbnail";
 
-interface Bookmark {
-  title: string;
-  url: string;
-}
-
 interface BookmarkFolderProps {
   title: string;
   bookmarks: Bookmark[];
   thumbnailUrl?: string;
   view: "grid" | "list";
+  onRemoveBookmark: (url: string, folderTitle: string) => void;
+  onMoveBookmark: (url: string, fromFolder: string, toFolder: string) => void;
+  availableFolders: string[];
 }
 
-export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: BookmarkFolderProps) {
+export function BookmarkFolder({ 
+  title, 
+  bookmarks, 
+  thumbnailUrl, 
+  view,
+  onRemoveBookmark,
+  onMoveBookmark,
+  availableFolders
+}: BookmarkFolderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
   const [folderThumbnail, setFolderThumbnail] = useState<string | null>(null);
@@ -125,6 +131,10 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
                 copiedStates={copiedStates}
                 handleCopyUrl={handleCopyUrl}
                 getFaviconUrl={getFaviconUrl}
+                folderTitle={title}
+                onRemoveBookmark={onRemoveBookmark}
+                onMoveBookmark={onMoveBookmark}
+                availableFolders={availableFolders}
               />
             ))}
           </div>

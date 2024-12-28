@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { ProcessedFolder, Bookmark } from "@/types/bookmark.types";
-import { getChromeBookmarks, createChromeFolder, createChromeBookmark } from "@/utils/chrome-api.utils";
+import { getChromeBookmarks, createChromeFolder, createChromeBookmark, removeBookmark, moveBookmark } from "@/utils/chrome-api.utils";
 import { processBookmarks, getSampleData } from "@/utils/bookmark-processor.utils";
 
 export function useBookmarks() {
@@ -119,6 +119,90 @@ export function useBookmarks() {
     }
   }, [fetchBookmarks, toast]);
 
+  const removeBookmark = useCallback(async (url: string, folderTitle: string) => {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+        await removeBookmark(url, folderTitle);
+        await fetchBookmarks();
+        toast({
+          title: "Success",
+          description: "Bookmark removed successfully",
+        });
+      } else {
+        setFolders((currentFolders) => 
+          currentFolders.map((folder) => {
+            if (folder.title === folderTitle) {
+              return {
+                ...folder,
+                bookmarks: folder.bookmarks.filter((b) => b.url !== url),
+              };
+            }
+            return folder;
+          })
+        );
+        toast({
+          title: "Success",
+          description: "Bookmark removed successfully (Development mode)",
+        });
+      }
+    } catch (error) {
+      console.error('Error removing bookmark:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove bookmark. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [fetchBookmarks, toast]);
+
+  const moveBookmark = useCallback(async (url: string, fromFolder: string, toFolder: string) => {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+        await moveBookmark(url, fromFolder, toFolder);
+        await fetchBookmarks();
+        toast({
+          title: "Success",
+          description: "Bookmark moved successfully",
+        });
+      } else {
+        setFolders((currentFolders) => {
+          const bookmark = currentFolders
+            .find((f) => f.title === fromFolder)
+            ?.bookmarks.find((b) => b.url === url);
+
+          if (!bookmark) return currentFolders;
+
+          return currentFolders.map((folder) => {
+            if (folder.title === fromFolder) {
+              return {
+                ...folder,
+                bookmarks: folder.bookmarks.filter((b) => b.url !== url),
+              };
+            }
+            if (folder.title === toFolder) {
+              return {
+                ...folder,
+                bookmarks: [...folder.bookmarks, bookmark],
+              };
+            }
+            return folder;
+          });
+        });
+        toast({
+          title: "Success",
+          description: "Bookmark moved successfully (Development mode)",
+        });
+      }
+    } catch (error) {
+      console.error('Error moving bookmark:', error);
+      toast({
+        title: "Error",
+        description: "Failed to move bookmark. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [fetchBookmarks, toast]);
+
   useEffect(() => {
     fetchBookmarks();
   }, [fetchBookmarks]);
@@ -130,5 +214,7 @@ export function useBookmarks() {
     refreshBookmarks: fetchBookmarks,
     createFolder,
     createBookmark,
+    removeBookmark,
+    moveBookmark,
   };
 }

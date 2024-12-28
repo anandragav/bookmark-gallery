@@ -1,5 +1,12 @@
-import { ExternalLink, Copy, Check } from "lucide-react";
+import { ExternalLink, Copy, Check, Trash2, MoveRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 interface BookmarkItemProps {
   bookmark: {
@@ -11,6 +18,10 @@ interface BookmarkItemProps {
   copiedStates: { [key: string]: boolean };
   handleCopyUrl: (url: string, title: string) => void;
   getFaviconUrl: (url: string) => string | null;
+  folderTitle: string;
+  onRemoveBookmark: (url: string, folderTitle: string) => void;
+  onMoveBookmark: (url: string, fromFolder: string, toFolder: string) => void;
+  availableFolders: string[];
 }
 
 export function BookmarkItem({ 
@@ -19,9 +30,14 @@ export function BookmarkItem({
   isExpanded,
   copiedStates,
   handleCopyUrl,
-  getFaviconUrl
+  getFaviconUrl,
+  folderTitle,
+  onRemoveBookmark,
+  onMoveBookmark,
+  availableFolders
 }: BookmarkItemProps) {
   const faviconUrl = getFaviconUrl(bookmark.url);
+  const [showMoveMenu, setShowMoveMenu] = useState(false);
 
   return (
     <div
@@ -54,21 +70,57 @@ export function BookmarkItem({
         )}
         {bookmark.title}
       </a>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-8 w-8 p-0"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleCopyUrl(bookmark.url, bookmark.title);
-        }}
-      >
-        {copiedStates[bookmark.url] ? (
-          <Check className="h-4 w-4 text-green-500" />
-        ) : (
-          <Copy className="h-4 w-4" />
-        )}
-      </Button>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleCopyUrl(bookmark.url, bookmark.title);
+          }}
+        >
+          {copiedStates[bookmark.url] ? (
+            <Check className="h-4 w-4 text-green-500" />
+          ) : (
+            <Copy className="h-4 w-4" />
+          )}
+        </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+            >
+              <MoveRight className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {availableFolders
+              .filter(folder => folder !== folderTitle)
+              .map((folder) => (
+                <DropdownMenuItem
+                  key={folder}
+                  onClick={() => onMoveBookmark(bookmark.url, folderTitle, folder)}
+                >
+                  Move to {folder}
+                </DropdownMenuItem>
+              ))
+            }
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+          onClick={() => onRemoveBookmark(bookmark.url, folderTitle)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

@@ -8,12 +8,16 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("alphabetical");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const { folders, isLoading, quickAccessBookmarks, createFolder } = useBookmarks();
-
-  console.log('Index rendering, folders:', folders);
+  const { 
+    folders, 
+    isLoading, 
+    quickAccessBookmarks, 
+    createFolder,
+    removeBookmark,
+    moveBookmark 
+  } = useBookmarks();
 
   const handleFolderCreate = useCallback((folderName: string) => {
-    console.log('Creating folder:', folderName);
     createFolder(folderName);
   }, [createFolder]);
 
@@ -54,6 +58,9 @@ const Index = () => {
         folders={sortedFolders} 
         view={view} 
         isLoading={isLoading}
+        onRemoveBookmark={removeBookmark}
+        onMoveBookmark={moveBookmark}
+        availableFolders={folders.map(f => f.title)}
       />
     </div>
   );

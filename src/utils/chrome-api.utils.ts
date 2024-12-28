@@ -77,3 +77,83 @@ export const createChromeBookmark = (
     }
   });
 };
+
+export const removeBookmark = async (url: string, folderTitle: string): Promise<void> => {
+  if (typeof chrome === 'undefined' || !chrome.bookmarks) {
+    console.log('Chrome API not available');
+    return;
+  }
+
+  try {
+    const bookmarks = await new Promise<chrome.bookmarks.BookmarkTreeNode[]>((resolve) => {
+      chrome.bookmarks.search({ url }, (results) => resolve(results));
+    });
+
+    const bookmark = bookmarks.find(b => {
+      if (!b.parentId) return false;
+      return new Promise((resolve) => {
+        chrome.bookmarks.get(b.parentId, (folder) => {
+          resolve(folder[0]?.title === folderTitle);
+        });
+      });
+    });
+
+    if (bookmark) {
+      await new Promise<void>((resolve) => {
+        chrome.bookmarks.remove(bookmark.id, () => resolve());
+      });
+    }
+  } catch (error) {
+    console.error('Error removing bookmark:', error);
+    throw error;
+  }
+};
+
+export const moveBookmark = async (
+  url: string,
+  fromFolderTitle: string,
+  toFolderTitle: string
+): Promise<void> => {
+  if (typeof chrome === 'undefined' || !chrome.bookmarks) {
+    console.log('Chrome API not available');
+    return;
+  }
+
+  try {
+    // Find the bookmark in the source folder
+    const bookmarks = await new Promise<chrome.bookmarks.BookmarkTreeNode[]>((resolve) => {
+      chrome.bookmarks.search({ url }, (results) => resolve(results));
+    });
+
+    const bookmark = bookmarks.find(b => {
+      if (!b.parentId) return false;
+      return new Promise((resolve) => {
+        chrome.bookmarks.get(b.parentId, (folder) => {
+          resolve(folder[0]?.title === fromFolderTitle);
+        });
+      });
+    });
+
+    if (!bookmark) {
+      throw new Error('Bookmark not found in source folder');
+    }
+
+    // Find the destination folder
+    const folders = await new Promise<chrome.bookmarks.BookmarkTreeNode[]>((resolve) => {
+      chrome.bookmarks.search({ title: toFolderTitle }, (results) => resolve(results));
+    });
+
+    const targetFolder = folders.find(f => !f.url);
+    if (!targetFolder) {
+      throw new Error('Target folder not found');
+    }
+
+    // Move the bookmark
+    await new Promise<void>((resolve) => {
+      chrome.bookmarks.move(bookmark.id, { parentId: targetFolder.id }, () => resolve());
+    });
+  } catch (error) {
+    console.error('Error moving bookmark:', error);
+    throw error;
+  }
+};
