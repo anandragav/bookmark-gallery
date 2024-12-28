@@ -60,6 +60,7 @@ export function useBookmarks() {
 
   const removeBookmark = useCallback(async (url: string, folderTitle: string) => {
     try {
+      console.log('Removing bookmark:', { url, folderTitle });
       if (typeof chrome !== 'undefined' && chrome.bookmarks) {
         await removeBookmarkApi(url, folderTitle);
         await fetchBookmarks();
@@ -68,6 +69,7 @@ export function useBookmarks() {
           description: "Bookmark removed successfully",
         });
       } else {
+        console.log('Development mode: removing bookmark');
         setFolders((currentFolders) => 
           currentFolders.map((folder) => {
             if (folder.title === folderTitle) {
@@ -96,6 +98,7 @@ export function useBookmarks() {
 
   const deleteFolder = useCallback(async (folderTitle: string) => {
     try {
+      console.log('Deleting folder:', folderTitle);
       if (typeof chrome !== 'undefined' && chrome.bookmarks) {
         await deleteFolderApi(folderTitle);
         await fetchBookmarks();
@@ -104,6 +107,7 @@ export function useBookmarks() {
           description: "Folder deleted successfully",
         });
       } else {
+        console.log('Development mode: deleting folder');
         setFolders((currentFolders) => 
           currentFolders.filter((folder) => folder.title !== folderTitle)
         );
@@ -117,54 +121,6 @@ export function useBookmarks() {
       toast({
         title: "Error",
         description: "Failed to delete folder. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [fetchBookmarks, setFolders, toast]);
-
-  const moveBookmark = useCallback(async (url: string, fromFolder: string, toFolder: string) => {
-    try {
-      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-        await moveBookmarkApi(url, fromFolder, toFolder);
-        await fetchBookmarks();
-        toast({
-          title: "Success",
-          description: "Bookmark moved successfully",
-        });
-      } else {
-        setFolders((currentFolders) => {
-          const bookmark = currentFolders
-            .find((f) => f.title === fromFolder)
-            ?.bookmarks.find((b) => b.url === url);
-
-          if (!bookmark) return currentFolders;
-
-          return currentFolders.map((folder) => {
-            if (folder.title === fromFolder) {
-              return {
-                ...folder,
-                bookmarks: folder.bookmarks.filter((b) => b.url !== url),
-              };
-            }
-            if (folder.title === toFolder) {
-              return {
-                ...folder,
-                bookmarks: [...folder.bookmarks, bookmark],
-              };
-            }
-            return folder;
-          });
-        });
-        toast({
-          title: "Success",
-          description: "Bookmark moved successfully (Development mode)",
-        });
-      }
-    } catch (error) {
-      console.error('Error moving bookmark:', error);
-      toast({
-        title: "Error",
-        description: "Failed to move bookmark. Please try again.",
         variant: "destructive",
       });
     }
