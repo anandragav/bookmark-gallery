@@ -44,10 +44,10 @@ export function CreateFolderDialog({ onFolderCreate }: CreateFolderDialogProps) 
           New Folder
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent aria-describedby="dialog-description">
         <DialogHeader>
           <DialogTitle>Create New Folder</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="dialog-description">
             Enter a name for your new bookmark folder.
           </DialogDescription>
         </DialogHeader>
@@ -57,6 +57,7 @@ export function CreateFolderDialog({ onFolderCreate }: CreateFolderDialogProps) 
             value={folderName}
             onChange={(e) => setFolderName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+            aria-label="Folder name"
           />
           <Button onClick={handleCreate} className="w-full">
             Create Folder
