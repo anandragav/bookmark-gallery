@@ -3,7 +3,7 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 import { BookmarksHeader } from "@/components/BookmarksHeader";
 import { BookmarksGrid } from "@/components/BookmarksGrid";
 import { QuickAccess } from "@/components/QuickAccess";
-import { AuroraBackground } from "@/components/AuroraBackground";
+import { Particles } from "@/components/Particles";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,8 +59,15 @@ const Index = () => {
   });
 
   return (
-    <AuroraBackground>
-      <div className="container mx-auto px-4 py-8">
+    <div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-900">
+      <Particles
+        className="absolute inset-0"
+        quantity={100}
+        staticity={50}
+        ease={50}
+        color={document.documentElement.classList.contains('dark') ? '#ffffff' : '#000000'}
+      />
+      <div className="container mx-auto px-4 py-8 relative">
         <BookmarksHeader
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -82,7 +89,7 @@ const Index = () => {
           availableFolders={folders.map(f => f.title)}
         />
       </div>
-    </AuroraBackground>
+    </div>
   );
 };
 
