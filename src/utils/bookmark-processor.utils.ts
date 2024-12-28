@@ -5,9 +5,23 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
   quickAccess: Bookmark[];
 } => {
   const processedFolders: ProcessedFolder[] = [];
-  const frequentBookmarks: Bookmark[] = [];
+  const pinnedBookmarks: Bookmark[] = [];
 
   const processNode = (node: ChromeBookmark) => {
+    // Check if this is the Bookmarks Bar folder (usually has parentId of "1")
+    if (node.id === "1") {
+      // Process direct children of the Bookmarks Bar as pinned bookmarks
+      node.children?.forEach(child => {
+        if (child.url) {
+          pinnedBookmarks.push({
+            title: child.title,
+            url: child.url,
+          });
+        }
+      });
+      return;
+    }
+
     if (node.title === 'Other Bookmarks' || node.title === 'Synced Bookmarks') {
       return;
     }
@@ -24,10 +38,6 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
         title: node.title,
         bookmarks,
       });
-      
-      if (frequentBookmarks.length < 6 && bookmarks.length > 0) {
-        frequentBookmarks.push(bookmarks[0]);
-      }
     }
 
     if (node.children) {
@@ -36,8 +46,18 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
   };
 
   bookmarks.forEach(processNode);
-  return { folders: processedFolders, quickAccess: frequentBookmarks };
+  return { 
+    folders: processedFolders, 
+    quickAccess: pinnedBookmarks.length > 0 ? pinnedBookmarks : getSamplePinnedBookmarks() 
+  };
 };
+
+export const getSamplePinnedBookmarks = (): Bookmark[] => [
+  { title: "GitHub", url: "https://github.com" },
+  { title: "Gmail", url: "https://gmail.com" },
+  { title: "Calendar", url: "https://calendar.google.com" },
+  { title: "Drive", url: "https://drive.google.com" },
+];
 
 export const getSampleData = (): ProcessedFolder[] => [
   {

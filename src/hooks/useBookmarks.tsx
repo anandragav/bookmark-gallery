@@ -1,13 +1,21 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { ProcessedFolder, Bookmark } from "@/types/bookmark.types";
-import { getChromeBookmarks, createChromeFolder, createChromeBookmark, removeBookmark, moveBookmark } from "@/utils/chrome-api.utils";
+import { getChromeBookmarks, removeBookmark as removeBookmarkApi, moveBookmark as moveBookmarkApi } from "@/utils/chrome-api.utils";
 import { processBookmarks, getSampleData } from "@/utils/bookmark-processor.utils";
+import { useBookmarksState } from "./useBookmarksState";
+import { useBookmarkOperations } from "./useBookmarkOperations";
 
 export function useBookmarks() {
-  const [folders, setFolders] = useState<ProcessedFolder[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [quickAccessBookmarks, setQuickAccessBookmarks] = useState<Bookmark[]>([]);
+  const { 
+    folders, 
+    setFolders, 
+    isLoading, 
+    setIsLoading, 
+    quickAccessBookmarks, 
+    setQuickAccessBookmarks 
+  } = useBookmarksState();
+  
   const { toast } = useToast();
 
   const fetchBookmarks = useCallback(async () => {
@@ -18,8 +26,8 @@ export function useBookmarks() {
         console.log('Chrome Bookmarks API is available');
         const bookmarkTreeNodes = await getChromeBookmarks();
         console.log('Got bookmark tree:', bookmarkTreeNodes);
-        const { folders, quickAccess } = processBookmarks(bookmarkTreeNodes);
-        setFolders(folders);
+        const { folders: processedFolders, quickAccess } = processBookmarks(bookmarkTreeNodes);
+        setFolders(processedFolders);
         setQuickAccessBookmarks(quickAccess);
       } else {
         console.log('Using development sample data');
@@ -27,7 +35,8 @@ export function useBookmarks() {
         setFolders(sampleFolders);
         setQuickAccessBookmarks([
           { title: "GitHub", url: "https://github.com" },
-          { title: "Twitter", url: "https://twitter.com" },
+          { title: "Gmail", url: "https://gmail.com" },
+          { title: "Calendar", url: "https://calendar.google.com" },
         ]);
       }
     } catch (error) {
@@ -40,89 +49,14 @@ export function useBookmarks() {
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, setFolders, setIsLoading, setQuickAccessBookmarks]);
 
-  const createFolder = useCallback(async (folderName: string) => {
-    console.log('Creating folder:', folderName);
-    try {
-      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-        await createChromeFolder(folderName);
-        await fetchBookmarks();
-        toast({
-          title: "Success",
-          description: "Folder created successfully",
-        });
-      } else {
-        setFolders((currentFolders) => [
-          ...currentFolders,
-          {
-            title: folderName,
-            bookmarks: [],
-          },
-        ]);
-        toast({
-          title: "Success",
-          description: "Folder created successfully (Development mode)",
-        });
-      }
-    } catch (error) {
-      console.error('Error creating folder:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create folder. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [fetchBookmarks, toast]);
-
-  const createBookmark = useCallback(async (folderTitle: string, url: string, title: string) => {
-    try {
-      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-        // Find the folder ID
-        chrome.bookmarks.search({ title: folderTitle }, async (results) => {
-          if (results.length > 0) {
-            const folderId = results[0].id;
-            await createChromeBookmark(folderId, url, title);
-            await fetchBookmarks();
-            toast({
-              title: "Success",
-              description: "Bookmark created successfully",
-            });
-          } else {
-            throw new Error('Folder not found');
-          }
-        });
-      } else {
-        setFolders((currentFolders) => 
-          currentFolders.map((folder) => {
-            if (folder.title === folderTitle) {
-              return {
-                ...folder,
-                bookmarks: [...folder.bookmarks, { title, url }],
-              };
-            }
-            return folder;
-          })
-        );
-        toast({
-          title: "Success",
-          description: "Bookmark created successfully (Development mode)",
-        });
-      }
-    } catch (error) {
-      console.error('Error creating bookmark:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create bookmark. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [fetchBookmarks, toast]);
+  const { createFolder, createBookmark } = useBookmarkOperations(fetchBookmarks);
 
   const removeBookmark = useCallback(async (url: string, folderTitle: string) => {
     try {
       if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-        await removeBookmark(url, folderTitle);
+        await removeBookmarkApi(url, folderTitle);
         await fetchBookmarks();
         toast({
           title: "Success",
@@ -153,12 +87,12 @@ export function useBookmarks() {
         variant: "destructive",
       });
     }
-  }, [fetchBookmarks, toast]);
+  }, [fetchBookmarks, setFolders, toast]);
 
   const moveBookmark = useCallback(async (url: string, fromFolder: string, toFolder: string) => {
     try {
       if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-        await moveBookmark(url, fromFolder, toFolder);
+        await moveBookmarkApi(url, fromFolder, toFolder);
         await fetchBookmarks();
         toast({
           title: "Success",
@@ -201,11 +135,7 @@ export function useBookmarks() {
         variant: "destructive",
       });
     }
-  }, [fetchBookmarks, toast]);
-
-  useEffect(() => {
-    fetchBookmarks();
-  }, [fetchBookmarks]);
+  }, [fetchBookmarks, setFolders, toast]);
 
   return {
     folders,
