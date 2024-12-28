@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { BookmarkItem } from "./BookmarkItem";
 import { FolderThumbnail } from "./FolderThumbnail";
-import { AddBookmarkDialog } from "./AddBookmarkDialog";
 
 interface Bookmark {
   title: string;
@@ -12,22 +11,13 @@ interface Bookmark {
 }
 
 interface BookmarkFolderProps {
-  id: string;
   title: string;
   bookmarks: Bookmark[];
   thumbnailUrl?: string;
   view: "grid" | "list";
-  onBookmarkAdd?: (folderId: string, bookmark: Bookmark) => void;
 }
 
-export function BookmarkFolder({ 
-  id,
-  title, 
-  bookmarks, 
-  thumbnailUrl, 
-  view,
-  onBookmarkAdd 
-}: BookmarkFolderProps) {
+export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: BookmarkFolderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
   const [folderThumbnail, setFolderThumbnail] = useState<string | null>(null);
@@ -85,12 +75,6 @@ export function BookmarkFolder({
     setThumbnailError(true);
   };
 
-  const handleAddBookmark = (bookmark: Bookmark) => {
-    if (onBookmarkAdd) {
-      onBookmarkAdd(id, bookmark);
-    }
-  };
-
   return (
     <Card 
       className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
@@ -143,10 +127,6 @@ export function BookmarkFolder({
                 getFaviconUrl={getFaviconUrl}
               />
             ))}
-            <AddBookmarkDialog 
-              folderId={id} 
-              onBookmarkAdd={handleAddBookmark}
-            />
           </div>
         </div>
       </div>

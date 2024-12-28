@@ -30,13 +30,40 @@ export function CreateFolderDialog({ onFolderCreate }: CreateFolderDialogProps) 
       return;
     }
 
-    onFolderCreate(folderName.trim());
-    setFolderName("");
-    setIsOpen(false);
-    toast({
-      title: "Success",
-      description: "Folder created successfully",
-    });
+    if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+      chrome.bookmarks.create(
+        { 
+          parentId: "1",  // "1" is typically the "Bookmarks Bar" folder
+          title: folderName.trim() 
+        },
+        (result) => {
+          if (chrome.runtime.lastError) {
+            toast({
+              title: "Error",
+              description: "Failed to create folder: " + chrome.runtime.lastError.message,
+              variant: "destructive",
+            });
+          } else {
+            onFolderCreate(folderName.trim());
+            setFolderName("");
+            setIsOpen(false);
+            toast({
+              title: "Success",
+              description: "Folder created successfully",
+            });
+          }
+        }
+      );
+    } else {
+      // For development environment
+      onFolderCreate(folderName.trim());
+      setFolderName("");
+      setIsOpen(false);
+      toast({
+        title: "Success",
+        description: "Folder created successfully (Development mode)",
+      });
+    }
   };
 
   return (
