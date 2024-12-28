@@ -26,10 +26,19 @@ export function useBookmarks() {
   const { toast } = useToast();
 
   const processBookmarks = useCallback((bookmarks: ChromeBookmark[]) => {
+    console.log('Processing bookmarks:', bookmarks); // Debug log
     const processedFolders: ProcessedFolder[] = [];
     const frequentBookmarks: Bookmark[] = [];
 
     const processNode = (node: ChromeBookmark) => {
+      console.log('Processing node:', node.title); // Debug log
+      
+      // Skip special Chrome folders
+      if (node.title === 'Other Bookmarks' || node.title === 'Synced Bookmarks') {
+        console.log('Skipping special folder:', node.title);
+        return;
+      }
+
       if (!node.url && node.children) {
         const bookmarks = node.children
           .filter((child) => child.url)
@@ -39,11 +48,12 @@ export function useBookmarks() {
           }));
 
         if (bookmarks.length > 0) {
+          console.log('Found folder with bookmarks:', node.title, bookmarks.length);
           processedFolders.push({
             title: node.title,
             bookmarks,
-            thumbnailUrl: undefined,
           });
+          
           // Add first bookmark from each folder to quick access
           if (frequentBookmarks.length < 6) {
             frequentBookmarks.push(bookmarks[0]);
@@ -57,6 +67,7 @@ export function useBookmarks() {
     };
 
     bookmarks.forEach(processNode);
+    console.log('Processed folders:', processedFolders.length);
     return { folders: processedFolders, quickAccess: frequentBookmarks };
   }, []);
 
@@ -64,14 +75,27 @@ export function useBookmarks() {
     const fetchBookmarks = async () => {
       setIsLoading(true);
       try {
+        console.log('Checking Chrome API availability...'); // Debug log
         if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+          console.log('Chrome Bookmarks API is available');
           chrome.bookmarks.getTree((bookmarkTreeNodes) => {
+            console.log('Got bookmark tree:', bookmarkTreeNodes); // Debug log
+            if (chrome.runtime.lastError) {
+              console.error('Chrome API error:', chrome.runtime.lastError);
+              toast({
+                title: "Error",
+                description: "Failed to load bookmarks: " + chrome.runtime.lastError.message,
+                variant: "destructive",
+              });
+              return;
+            }
             const { folders, quickAccess } = processBookmarks(bookmarkTreeNodes);
             setFolders(folders);
             setQuickAccessBookmarks(quickAccess);
             setIsLoading(false);
           });
         } else {
+          console.log('Using development sample data');
           // Sample data for development
           const sampleFolders: ProcessedFolder[] = [
             {
