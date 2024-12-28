@@ -13,99 +13,141 @@ interface ProcessedFolder {
   bookmarks: Bookmark[];
 }
 
-// Initial data to populate when no bookmarks exist
-const initialFolders: ProcessedFolder[] = [
-  {
-    id: "1",
-    title: "Development",
-    bookmarks: [
-      {
-        title: "GitHub",
-        url: "https://github.com"
-      },
-      {
-        title: "Stack Overflow",
-        url: "https://stackoverflow.com"
-      }
-    ]
-  },
-  {
-    id: "2",
-    title: "Social Media",
-    bookmarks: [
-      {
-        title: "Twitter",
-        url: "https://twitter.com"
-      },
-      {
-        title: "LinkedIn",
-        url: "https://linkedin.com"
-      }
-    ]
-  }
-];
-
 export function useBookmarks() {
   const [folders, setFolders] = useState<ProcessedFolder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [quickAccessBookmarks, setQuickAccessBookmarks] = useState<Bookmark[]>([]);
   const { toast } = useToast();
 
-  // Load folders from localStorage on mount
+  // Load bookmarks from Chrome API
   useEffect(() => {
-    const savedFolders = localStorage.getItem('bookmarkFolders');
-    if (savedFolders) {
-      setFolders(JSON.parse(savedFolders));
-    } else {
-      // Initialize with default folders if no data exists
-      setFolders(initialFolders);
-      localStorage.setItem('bookmarkFolders', JSON.stringify(initialFolders));
-    }
-    setIsLoading(false);
-  }, []);
+    const loadBookmarks = async () => {
+      try {
+        // Check if chrome.bookmarks is available
+        if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+          const tree = await chrome.bookmarks.getTree();
+          const processedFolders: ProcessedFolder[] = [];
+          
+          // Process bookmark tree
+          const processNode = (node: chrome.bookmarks.BookmarkTreeNode) => {
+            // Skip root folders and empty folders
+            if (node.children && node.title && node.id !== "0" && node.id !== "1") {
+              const bookmarks: Bookmark[] = [];
+              
+              // Collect bookmarks from this folder
+              node.children.forEach(child => {
+                if (child.url) {
+                  bookmarks.push({
+                    title: child.title,
+                    url: child.url
+                  });
+                }
+              });
 
-  // Save folders to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('bookmarkFolders', JSON.stringify(folders));
-  }, [folders]);
+              // Only add folders that have bookmarks
+              if (bookmarks.length > 0) {
+                processedFolders.push({
+                  id: node.id,
+                  title: node.title,
+                  bookmarks: bookmarks
+                });
+              }
+            }
+            
+            // Process subfolders
+            if (node.children) {
+              node.children.forEach(processNode);
+            }
+          };
 
-  const createFolder = useCallback((folderName: string) => {
-    const newFolder: ProcessedFolder = {
-      id: Date.now().toString(),
-      title: folderName,
-      bookmarks: []
+          // Process the entire tree
+          tree[0].children?.forEach(processNode);
+          setFolders(processedFolders);
+          console.log('Loaded folders:', processedFolders);
+        } else {
+          console.warn('Chrome bookmarks API not available');
+          toast({
+            title: "Warning",
+            description: "Chrome bookmarks API not available. Are you running this as a Chrome extension?",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error('Error loading bookmarks:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load bookmarks",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
-    setFolders(prev => [...prev, newFolder]);
-    
-    toast({
-      title: "Folder Created",
-      description: `Created new folder: ${folderName}`,
-    });
+
+    loadBookmarks();
   }, [toast]);
 
-  const addBookmarkToFolder = useCallback((folderId: string, bookmark: Bookmark) => {
-    setFolders(prev => prev.map(folder => {
-      if (folder.id === folderId) {
-        return {
-          ...folder,
-          bookmarks: [...folder.bookmarks, bookmark]
-        };
-      }
-      return folder;
-    }));
+  const createFolder = useCallback(async (folderName: string) => {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+        const newFolder = await chrome.bookmarks.create({
+          title: folderName,
+          parentId: "1" // Create in the bookmarks bar
+        });
+        
+        setFolders(prev => [...prev, {
+          id: newFolder.id,
+          title: newFolder.title,
+          bookmarks: []
+        }]);
 
-    // Update quick access if needed
-    setQuickAccessBookmarks(prev => {
-      if (prev.length < 6) {
-        return [...prev, bookmark];
+        toast({
+          title: "Success",
+          description: "Folder created successfully",
+        });
       }
-      return prev;
-    });
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create folder",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
-    toast({
-      title: "Bookmark Added",
-      description: `Added bookmark: ${bookmark.title}`,
-    });
+  const addBookmarkToFolder = useCallback(async (folderId: string, bookmark: Bookmark) => {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+        const newBookmark = await chrome.bookmarks.create({
+          parentId: folderId,
+          title: bookmark.title,
+          url: bookmark.url
+        });
+
+        setFolders(prev => prev.map(folder => {
+          if (folder.id === folderId) {
+            return {
+              ...folder,
+              bookmarks: [...folder.bookmarks, bookmark]
+            };
+          }
+          return folder;
+        }));
+
+        toast({
+          title: "Success",
+          description: "Bookmark added successfully",
+        });
+      }
+    } catch (error) {
+      console.error('Error adding bookmark:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add bookmark",
+        variant: "destructive",
+      });
+    }
   }, [toast]);
 
   return {
