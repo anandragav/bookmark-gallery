@@ -19,6 +19,20 @@ export function useBookmarks() {
   const [quickAccessBookmarks, setQuickAccessBookmarks] = useState<Bookmark[]>([]);
   const { toast } = useToast();
 
+  // Load folders from localStorage on mount
+  useEffect(() => {
+    const savedFolders = localStorage.getItem('bookmarkFolders');
+    if (savedFolders) {
+      setFolders(JSON.parse(savedFolders));
+    }
+    setIsLoading(false);
+  }, []);
+
+  // Save folders to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('bookmarkFolders', JSON.stringify(folders));
+  }, [folders]);
+
   const createFolder = useCallback((folderName: string) => {
     const newFolder: ProcessedFolder = {
       id: Date.now().toString(),
@@ -26,7 +40,12 @@ export function useBookmarks() {
       bookmarks: []
     };
     setFolders(prev => [...prev, newFolder]);
-  }, []);
+    
+    toast({
+      title: "Folder Created",
+      description: `Created new folder: ${folderName}`,
+    });
+  }, [toast]);
 
   const addBookmarkToFolder = useCallback((folderId: string, bookmark: Bookmark) => {
     setFolders(prev => prev.map(folder => {
@@ -46,12 +65,12 @@ export function useBookmarks() {
       }
       return prev;
     });
-  }, []);
 
-  useEffect(() => {
-    // Initialize with empty state
-    setIsLoading(false);
-  }, []);
+    toast({
+      title: "Bookmark Added",
+      description: `Added bookmark: ${bookmark.title}`,
+    });
+  }, [toast]);
 
   return {
     folders,
