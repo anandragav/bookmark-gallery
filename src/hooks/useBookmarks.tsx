@@ -96,6 +96,48 @@ export function useBookmarks() {
     }
   }, [fetchBookmarks, setFolders, toast]);
 
+  const moveBookmark = useCallback(async (url: string, fromFolder: string, toFolder: string) => {
+    try {
+      console.log('Moving bookmark:', { url, fromFolder, toFolder });
+      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+        await moveBookmarkApi(url, fromFolder, toFolder);
+        await fetchBookmarks();
+        toast({
+          title: "Success",
+          description: "Bookmark moved successfully",
+        });
+      } else {
+        console.log('Development mode: moving bookmark');
+        setFolders((currentFolders) => {
+          const updatedFolders = [...currentFolders];
+          const sourceFolder = updatedFolders.find(f => f.title === fromFolder);
+          const targetFolder = updatedFolders.find(f => f.title === toFolder);
+          
+          if (sourceFolder && targetFolder) {
+            const bookmarkToMove = sourceFolder.bookmarks.find(b => b.url === url);
+            if (bookmarkToMove) {
+              sourceFolder.bookmarks = sourceFolder.bookmarks.filter(b => b.url !== url);
+              targetFolder.bookmarks.push(bookmarkToMove);
+            }
+          }
+          
+          return updatedFolders;
+        });
+        toast({
+          title: "Success",
+          description: "Bookmark moved successfully (Development mode)",
+        });
+      }
+    } catch (error) {
+      console.error('Error moving bookmark:', error);
+      toast({
+        title: "Error",
+        description: "Failed to move bookmark. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [fetchBookmarks, setFolders, toast]);
+
   const deleteFolder = useCallback(async (folderTitle: string) => {
     try {
       console.log('Deleting folder:', folderTitle);
