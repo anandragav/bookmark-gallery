@@ -22,7 +22,7 @@ export function BookmarksGrid({ folders, view, isLoading }: BookmarksGridProps) 
   if (isLoading) {
     return (
       <div className={view === "grid" 
-        ? "grid grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) gap-4" 
+        ? "grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4" 
         : "flex flex-col gap-4"
       }>
         {Array.from({ length: 6 }).map((_, index) => (
@@ -34,7 +34,7 @@ export function BookmarksGrid({ folders, view, isLoading }: BookmarksGridProps) 
 
   return (
     <div className={view === "grid" 
-      ? "grid grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) gap-4" 
+      ? "grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4" 
       : "flex flex-col gap-4"
     }>
       {folders.map((folder, index) => (
