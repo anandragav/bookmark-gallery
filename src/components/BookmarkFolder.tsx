@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { BookmarkItem } from "./BookmarkItem";
 import { FolderThumbnail } from "./FolderThumbnail";
+import { Bookmark } from "@/types/bookmark.types";
 
 interface BookmarkFolderProps {
   title: string;
