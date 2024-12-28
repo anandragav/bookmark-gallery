@@ -67,19 +67,35 @@ export function useBookmarks() {
     try {
       if (typeof chrome !== 'undefined' && chrome.bookmarks) {
         await new Promise<void>((resolve, reject) => {
-          chrome.bookmarks.create(
-            { 
-              parentId: '1',  // '1' is typically the "Bookmarks Bar" folder
-              title: folderName 
-            },
-            (result) => {
-              if (chrome.runtime.lastError) {
-                reject(new Error(chrome.runtime.lastError.message));
-              } else {
-                resolve();
-              }
+          // First, find the Bookmarks Bar folder
+          chrome.bookmarks.getTree((tree) => {
+            if (chrome.runtime.lastError) {
+              reject(chrome.runtime.lastError);
+              return;
             }
-          );
+
+            // The Bookmarks Bar is typically the first child of the root
+            const bookmarksBar = tree[0].children?.[0];
+            if (!bookmarksBar) {
+              reject(new Error('Could not find Bookmarks Bar'));
+              return;
+            }
+
+            // Create the new folder in the Bookmarks Bar
+            chrome.bookmarks.create(
+              {
+                parentId: bookmarksBar.id,
+                title: folderName,
+              },
+              (result) => {
+                if (chrome.runtime.lastError) {
+                  reject(chrome.runtime.lastError);
+                } else {
+                  resolve();
+                }
+              }
+            );
+          });
         });
       } else {
         // Development mode: just add a new empty folder
@@ -91,10 +107,13 @@ export function useBookmarks() {
           }
         ]);
       }
+      
       toast({
         title: "Success",
         description: "Folder created successfully",
       });
+      
+      // Refresh the bookmarks list to show the new folder
       await fetchBookmarks();
     } catch (error) {
       console.error('Error creating folder:', error);
