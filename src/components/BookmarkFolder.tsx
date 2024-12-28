@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { BookmarkItem } from "./BookmarkItem";
 import { FolderThumbnail } from "./FolderThumbnail";
+import { AddBookmarkDialog } from "./AddBookmarkDialog";
 
 interface Bookmark {
   title: string;
@@ -15,9 +16,16 @@ interface BookmarkFolderProps {
   bookmarks: Bookmark[];
   thumbnailUrl?: string;
   view: "grid" | "list";
+  onBookmarkAdd?: (folderTitle: string, url: string, title: string) => void;
 }
 
-export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: BookmarkFolderProps) {
+export function BookmarkFolder({ 
+  title, 
+  bookmarks, 
+  thumbnailUrl, 
+  view,
+  onBookmarkAdd 
+}: BookmarkFolderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copiedStates, setCopiedStates] = useState<{ [key: string]: boolean }>({});
   const [folderThumbnail, setFolderThumbnail] = useState<string | null>(null);
@@ -75,6 +83,12 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
     setThumbnailError(true);
   };
 
+  const handleBookmarkAdd = (url: string, bookmarkTitle: string) => {
+    if (onBookmarkAdd) {
+      onBookmarkAdd(title, url, bookmarkTitle);
+    }
+  };
+
   return (
     <Card 
       className={`group overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] ${
@@ -127,6 +141,10 @@ export function BookmarkFolder({ title, bookmarks, thumbnailUrl, view }: Bookmar
                 getFaviconUrl={getFaviconUrl}
               />
             ))}
+            <AddBookmarkDialog 
+              folderTitle={title}
+              onBookmarkAdd={handleBookmarkAdd}
+            />
           </div>
         </div>
       </div>

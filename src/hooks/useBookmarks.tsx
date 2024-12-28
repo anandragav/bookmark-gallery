@@ -90,7 +90,6 @@ export function useBookmarks() {
         });
       } else {
         console.log('Using development sample data');
-        // For development environment, add the new folder to the existing folders
         setFolders((currentFolders) => {
           const sampleFolders: ProcessedFolder[] = currentFolders.length > 0 ? currentFolders : [
             {
@@ -145,7 +144,6 @@ export function useBookmarks() {
               variant: "destructive",
             });
           } else {
-            // Refresh bookmarks after creating folder
             fetchBookmarks();
             toast({
               title: "Success",
@@ -155,7 +153,6 @@ export function useBookmarks() {
         }
       );
     } else {
-      // For development environment
       setFolders((currentFolders) => [
         ...currentFolders,
         {
@@ -170,6 +167,68 @@ export function useBookmarks() {
     }
   }, [fetchBookmarks, toast]);
 
+  const createBookmark = useCallback((folderTitle: string, url: string, title: string) => {
+    console.log('Creating bookmark:', { folderTitle, url, title });
+    if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+      chrome.bookmarks.search({ title: folderTitle }, (results) => {
+        if (chrome.runtime.lastError) {
+          toast({
+            title: "Error",
+            description: "Failed to find folder: " + chrome.runtime.lastError.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const folder = results.find(r => r.title === folderTitle && !r.url);
+        if (!folder) {
+          toast({
+            title: "Error",
+            description: "Folder not found",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        chrome.bookmarks.create({
+          parentId: folder.id,
+          title: title,
+          url: url
+        }, (result) => {
+          if (chrome.runtime.lastError) {
+            toast({
+              title: "Error",
+              description: "Failed to create bookmark: " + chrome.runtime.lastError.message,
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Success",
+              description: "Bookmark created successfully",
+            });
+            fetchBookmarks();
+          }
+        });
+      });
+    } else {
+      setFolders(currentFolders => {
+        return currentFolders.map(folder => {
+          if (folder.title === folderTitle) {
+            return {
+              ...folder,
+              bookmarks: [...folder.bookmarks, { title, url }]
+            };
+          }
+          return folder;
+        });
+      });
+      toast({
+        title: "Success",
+        description: "Bookmark created successfully (Development mode)",
+      });
+    }
+  }, [toast]);
+
   useEffect(() => {
     fetchBookmarks();
   }, [fetchBookmarks]);
@@ -180,5 +239,6 @@ export function useBookmarks() {
     quickAccessBookmarks,
     refreshBookmarks: fetchBookmarks,
     createFolder,
+    createBookmark,
   };
 }

@@ -8,14 +8,23 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState("alphabetical");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const { folders, isLoading, quickAccessBookmarks, createFolder } = useBookmarks();
-
-  console.log('Index rendering, folders:', folders);
+  const { 
+    folders, 
+    isLoading, 
+    quickAccessBookmarks, 
+    createFolder,
+    createBookmark 
+  } = useBookmarks();
 
   const handleFolderCreate = useCallback((folderName: string) => {
     console.log('Creating folder:', folderName);
     createFolder(folderName);
   }, [createFolder]);
+
+  const handleBookmarkAdd = useCallback((folderTitle: string, url: string, title: string) => {
+    console.log('Adding bookmark:', { folderTitle, url, title });
+    createBookmark(folderTitle, url, title);
+  }, [createBookmark]);
 
   const filteredFolders = folders.filter((folder) =>
     folder.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -54,6 +63,7 @@ const Index = () => {
         folders={sortedFolders} 
         view={view} 
         isLoading={isLoading}
+        onBookmarkAdd={handleBookmarkAdd}
       />
     </div>
   );
