@@ -1,4 +1,4 @@
-import { ExternalLink, Copy, Check, Trash2, MoveRight } from "lucide-react";
+import { ExternalLink, Copy, Check, MoveRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -32,12 +32,10 @@ export function BookmarkItem({
   handleCopyUrl,
   getFaviconUrl,
   folderTitle,
-  onRemoveBookmark,
   onMoveBookmark,
   availableFolders
 }: BookmarkItemProps) {
   const faviconUrl = getFaviconUrl(bookmark.url);
-  const [showMoveMenu, setShowMoveMenu] = useState(false);
 
   return (
     <div
@@ -111,15 +109,6 @@ export function BookmarkItem({
             }
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-          onClick={() => onRemoveBookmark(bookmark.url, folderTitle)}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );
