@@ -1,41 +1,9 @@
 import { useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { createChromeFolder, createChromeBookmark } from "@/utils/chrome-api.utils";
+import { createChromeBookmark } from "@/utils/chrome-api.utils";
 
 export function useBookmarkOperations(onSuccess?: () => void) {
   const { toast } = useToast();
-
-  const createFolder = useCallback(async (folderName: string) => {
-    try {
-      if (!folderName.trim()) {
-        toast({
-          title: "Error",
-          description: "Folder name cannot be empty",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      const result = await createChromeFolder(folderName.trim());
-      console.log('Folder creation result:', result);
-      
-      toast({
-        title: "Success",
-        description: "Folder created successfully",
-      });
-      
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (error) {
-      console.error('Error creating folder:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create folder. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [toast, onSuccess]);
 
   const createBookmark = useCallback(async (folderTitle: string, url: string, title: string) => {
     try {
@@ -76,7 +44,6 @@ export function useBookmarkOperations(onSuccess?: () => void) {
   }, [toast, onSuccess]);
 
   return {
-    createFolder,
     createBookmark,
   };
 }
