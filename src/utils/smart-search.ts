@@ -2,6 +2,7 @@ import { pipeline } from "@huggingface/transformers";
 import { Bookmark } from "@/types/bookmark.types";
 
 let embeddingModel: any = null;
+let isSmartSearchAvailable = true;
 
 export async function initializeEmbeddingModel() {
   if (!embeddingModel) {
@@ -22,13 +23,9 @@ export async function initializeEmbeddingModel() {
           { device: "wasm" }
         );
       } catch (wasmError) {
-        console.log("WASM not available, falling back to CPU");
-        // Final fallback to CPU
-        embeddingModel = await pipeline(
-          "feature-extraction",
-          "mixedbread-ai/mxbai-embed-xsmall-v1",
-          { device: "cpu" }
-        );
+        console.log("Smart search is not available on this device");
+        isSmartSearchAvailable = false;
+        return null;
       }
     }
   }
@@ -36,7 +33,11 @@ export async function initializeEmbeddingModel() {
 }
 
 export async function getEmbeddings(text: string) {
+  if (!isSmartSearchAvailable) return null;
+  
   const model = await initializeEmbeddingModel();
+  if (!model) return null;
+  
   const embeddings = await model(text, { pooling: "mean", normalize: true });
   return embeddings.tolist()[0];
 }
@@ -54,14 +55,33 @@ interface BookmarkWithScore extends Bookmark {
 }
 
 export async function smartSearch(query: string, folders: { title: string; bookmarks: Bookmark[] }[]) {
+  if (!isSmartSearchAvailable) {
+    // Fall back to basic text search
+    return folders.reduce((results: BookmarkWithScore[], folder) => {
+      const matchingBookmarks = folder.bookmarks.filter(bookmark => {
+        const searchText = `${bookmark.title} ${bookmark.url}`.toLowerCase();
+        return searchText.includes(query.toLowerCase());
+      }).map(bookmark => ({
+        ...bookmark,
+        score: 1,
+        folderTitle: folder.title
+      }));
+      return [...results, ...matchingBookmarks];
+    }, []);
+  }
+
   try {
     const queryEmbedding = await getEmbeddings(query.toLowerCase());
+    if (!queryEmbedding) return [];
+
     const results: BookmarkWithScore[] = [];
 
     for (const folder of folders) {
       for (const bookmark of folder.bookmarks) {
         const bookmarkText = `${bookmark.title} ${bookmark.url}`.toLowerCase();
         const bookmarkEmbedding = await getEmbeddings(bookmarkText);
+        if (!bookmarkEmbedding) continue;
+        
         const similarity = await cosineSimilarity(queryEmbedding, bookmarkEmbedding);
 
         results.push({
