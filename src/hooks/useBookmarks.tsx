@@ -2,9 +2,9 @@ import { useState, useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { 
   getChromeBookmarks, 
-  removeBookmark, 
-  deleteFolder,
-  moveBookmark as moveBookmarkApi 
+  removeBookmark as removeBookmarkApi, 
+  deleteFolder as deleteFolderApi,
+  moveBookmark as moveBookmarkApi
 } from "@/utils/chrome-api.utils";
 import { ProcessedFolder, Bookmark } from "@/types/bookmark.types";
 import { processBookmarks } from "@/utils/bookmark-processor.utils";
@@ -19,9 +19,9 @@ export function useBookmarks() {
     setIsLoading(true);
     try {
       const bookmarks = await getChromeBookmarks();
-      const processedFolders = processBookmarks(bookmarks);
-      setFolders(processedFolders);
-      setQuickAccessBookmarks(processedFolders.flatMap(folder => folder.bookmarks).slice(0, 5));
+      const processedData = processBookmarks(bookmarks);
+      setFolders(processedData.folders);
+      setQuickAccessBookmarks(processedData.quickAccess);
     } catch (error) {
       console.error('Error fetching bookmarks:', error);
       toast({
@@ -36,7 +36,6 @@ export function useBookmarks() {
 
   const moveBookmark = useCallback(async (url: string, fromFolder: string, toFolder: string) => {
     try {
-      console.log('Moving bookmark:', { url, fromFolder, toFolder });
       if (typeof chrome !== 'undefined' && chrome.bookmarks) {
         await moveBookmarkApi(url, fromFolder, toFolder);
         await fetchBookmarks();
@@ -74,11 +73,11 @@ export function useBookmarks() {
         variant: "destructive",
       });
     }
-  }, [fetchBookmarks, setFolders, toast]);
+  }, [fetchBookmarks, toast]);
 
   const deleteFolder = useCallback(async (folderTitle: string) => {
     try {
-      await deleteFolder(folderTitle);
+      await deleteFolderApi(folderTitle);
       await fetchBookmarks();
       toast({
         title: "Success",
@@ -99,7 +98,7 @@ export function useBookmarks() {
     isLoading,
     quickAccessBookmarks,
     fetchBookmarks,
-    removeBookmark,
+    removeBookmark: removeBookmarkApi,
     moveBookmark,
     deleteFolder,
   };

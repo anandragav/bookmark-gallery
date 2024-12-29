@@ -13,15 +13,10 @@ const Index = () => {
     folders, 
     isLoading, 
     quickAccessBookmarks, 
-    createFolder,
     removeBookmark,
     moveBookmark,
     deleteFolder
   } = useBookmarks();
-
-  const handleFolderCreate = useCallback((folderName: string) => {
-    createFolder(folderName);
-  }, [createFolder]);
 
   const [smartSearchResults, setSmartSearchResults] = useState<any[]>([]);
 
@@ -76,7 +71,6 @@ const Index = () => {
           onSortChange={setSortOption}
           view={view}
           onViewChange={setView}
-          onFolderCreate={handleFolderCreate}
           folders={folders}
           onSmartSearchResults={setSmartSearchResults}
         />

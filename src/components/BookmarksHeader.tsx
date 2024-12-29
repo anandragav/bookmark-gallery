@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/select";
 import { ViewToggle } from "./ViewToggle";
 import { ThemeToggle } from "./ThemeToggle";
-import { CreateFolderDialog } from "./CreateFolderDialog";
 import { BookmarkSearch } from "./BookmarkSearch";
 import { Bookmark } from "@/types/bookmark.types";
 
@@ -18,7 +17,6 @@ interface BookmarksHeaderProps {
   onSortChange: (value: string) => void;
   view: "grid" | "list";
   onViewChange: (view: "grid" | "list") => void;
-  onFolderCreate: (folderName: string) => void;
   folders: { title: string; bookmarks: Bookmark[] }[];
   onSmartSearchResults: (results: any[]) => void;
 }
@@ -30,7 +28,6 @@ export function BookmarksHeader({
   onSortChange,
   view,
   onViewChange,
-  onFolderCreate,
   folders,
   onSmartSearchResults,
 }: BookmarksHeaderProps) {
@@ -66,7 +63,6 @@ export function BookmarksHeader({
           </SelectContent>
         </Select>
         <ViewToggle view={view} onViewChange={onViewChange} />
-        <CreateFolderDialog onFolderCreate={onFolderCreate} />
       </div>
     </header>
   );
