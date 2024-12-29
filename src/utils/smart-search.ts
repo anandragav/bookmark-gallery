@@ -14,12 +14,22 @@ export async function initializeEmbeddingModel() {
       );
     } catch (error) {
       console.log("WebGPU not available, falling back to WASM");
-      // Fall back to WASM if WebGPU is not available
-      embeddingModel = await pipeline(
-        "feature-extraction",
-        "mixedbread-ai/mxbai-embed-xsmall-v1",
-        { device: "wasm" }
-      );
+      try {
+        // Fall back to WASM if WebGPU is not available
+        embeddingModel = await pipeline(
+          "feature-extraction",
+          "mixedbread-ai/mxbai-embed-xsmall-v1",
+          { device: "wasm" }
+        );
+      } catch (wasmError) {
+        console.log("WASM not available, falling back to CPU");
+        // Final fallback to CPU
+        embeddingModel = await pipeline(
+          "feature-extraction",
+          "mixedbread-ai/mxbai-embed-xsmall-v1",
+          { device: "cpu" }
+        );
+      }
     }
   }
   return embeddingModel;
