@@ -7,20 +7,26 @@ let isSmartSearchAvailable = true;
 export async function initializeEmbeddingModel() {
   if (!embeddingModel) {
     try {
-      // Try WebGPU first
+      // Try WebGPU first with explicit dtype
       embeddingModel = await pipeline(
         "feature-extraction",
         "mixedbread-ai/mxbai-embed-xsmall-v1",
-        { device: "webgpu" }
+        { 
+          device: "webgpu",
+          dtype: "float32"
+        }
       );
     } catch (error) {
       console.log("WebGPU not available, falling back to WASM");
       try {
-        // Fall back to WASM if WebGPU is not available
+        // Fall back to WASM with explicit dtype
         embeddingModel = await pipeline(
           "feature-extraction",
           "mixedbread-ai/mxbai-embed-xsmall-v1",
-          { device: "wasm" }
+          { 
+            device: "wasm",
+            dtype: "float32"
+          }
         );
       } catch (wasmError) {
         console.log("Smart search is not available on this device");
