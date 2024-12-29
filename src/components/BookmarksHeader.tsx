@@ -50,7 +50,8 @@ export function BookmarksHeader({
     // Close dialog and reset input after successful creation
     setIsDialogOpen(false);
     setNewFolderName("");
-    // Note: removed window.location.reload() as it's not needed
+    // Trigger a re-fetch of the bookmarks
+    window.dispatchEvent(new Event('bookmarks-updated'));
   });
 
   const handleCreateFolder = async () => {

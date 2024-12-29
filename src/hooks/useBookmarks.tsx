@@ -29,7 +29,6 @@ export function useBookmarks() {
         description: "Failed to fetch bookmarks. Please try again.",
         variant: "destructive",
       });
-      // Even on error, we should set some default data to prevent infinite loading
       setFolders([]);
       setQuickAccessBookmarks([]);
     } finally {
@@ -37,9 +36,18 @@ export function useBookmarks() {
     }
   }, [toast]);
 
-  // Add useEffect to fetch bookmarks on mount
+  // Add event listener for bookmark updates
   useEffect(() => {
+    const handleBookmarksUpdate = () => {
+      fetchBookmarks();
+    };
+
+    window.addEventListener('bookmarks-updated', handleBookmarksUpdate);
     fetchBookmarks();
+
+    return () => {
+      window.removeEventListener('bookmarks-updated', handleBookmarksUpdate);
+    };
   }, [fetchBookmarks]);
 
   const moveBookmark = useCallback(async (url: string, fromFolder: string, toFolder: string) => {
