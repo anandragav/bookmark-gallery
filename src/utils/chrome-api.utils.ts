@@ -12,42 +12,53 @@ export const getChromeBookmarks = async (): Promise<ChromeBookmark[]> => {
     } else {
       console.log('Development mode: returning sample bookmarks');
       resolve([{
-        id: "1",
-        title: "Bookmarks Bar",
-        children: [
-          {
-            id: "2",
-            title: "Development",
-            children: [
-              {
-                id: "3",
-                title: "GitHub",
-                url: "https://github.com"
-              },
-              {
-                id: "4",
-                title: "Stack Overflow",
-                url: "https://stackoverflow.com"
-              }
-            ]
-          },
-          {
-            id: "5",
-            title: "Social",
-            children: [
-              {
-                id: "6",
-                title: "Twitter",
-                url: "https://twitter.com"
-              },
-              {
-                id: "7",
-                title: "LinkedIn",
-                url: "https://linkedin.com"
-              }
-            ]
-          }
-        ]
+        id: "0",
+        title: "root",
+        children: [{
+          id: "1",
+          title: "Bookmarks Bar",
+          parentId: "0",
+          children: [
+            {
+              id: "2",
+              parentId: "1",
+              title: "Development",
+              children: [
+                {
+                  id: "3",
+                  parentId: "2",
+                  title: "GitHub",
+                  url: "https://github.com"
+                },
+                {
+                  id: "4",
+                  parentId: "2",
+                  title: "Stack Overflow",
+                  url: "https://stackoverflow.com"
+                }
+              ]
+            },
+            {
+              id: "5",
+              parentId: "1",
+              title: "Social",
+              children: [
+                {
+                  id: "6",
+                  parentId: "5",
+                  title: "Twitter",
+                  url: "https://twitter.com"
+                },
+                {
+                  id: "7",
+                  parentId: "5",
+                  title: "LinkedIn",
+                  url: "https://linkedin.com"
+                }
+              ]
+            }
+          ]
+        }]
       }]);
     }
   });
@@ -138,7 +149,6 @@ export const createChromeFolder = async (folderName: string): Promise<ChromeBook
             reject(chrome.runtime.lastError);
           } else {
             console.log('Folder created successfully:', result);
-            // Dispatch event to update UI
             window.dispatchEvent(new Event('bookmarks-updated'));
             resolve(result);
           }
@@ -146,15 +156,14 @@ export const createChromeFolder = async (folderName: string): Promise<ChromeBook
       });
     } else if (isDevelopment) {
       console.log('Development mode: simulating folder creation');
-      // In development mode, return a mock folder with a delay to simulate API call
       setTimeout(() => {
         const mockFolder = {
           id: "mock-id-" + Date.now(),
+          parentId: "1",
           title: folderName,
           dateAdded: Date.now()
         };
         console.log('Mock folder created:', mockFolder);
-        // Dispatch event to update UI
         window.dispatchEvent(new Event('bookmarks-updated'));
         resolve(mockFolder);
       }, 500);
@@ -175,17 +184,21 @@ export const createChromeBookmark = async (folderId: string, url: string, title:
         if (chrome.runtime.lastError) {
           reject(chrome.runtime.lastError);
         } else {
+          window.dispatchEvent(new Event('bookmarks-updated'));
           resolve(result);
         }
       });
     } else {
       console.log('Development mode: simulating bookmark creation');
-      resolve({
+      const mockBookmark = {
         id: "mock-id-" + Date.now(),
+        parentId: folderId,
         title,
         url,
         dateAdded: Date.now()
-      });
+      };
+      window.dispatchEvent(new Event('bookmarks-updated'));
+      resolve(mockBookmark);
     }
   });
 };

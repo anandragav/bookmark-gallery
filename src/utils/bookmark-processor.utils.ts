@@ -8,47 +8,52 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
   const pinnedBookmarks: Bookmark[] = [];
 
   const processNode = (node: ChromeBookmark) => {
-    // Check if this is the Bookmarks Bar folder (usually has parentId of "1")
-    if (node.id === "1") {
-      // Process direct children of the Bookmarks Bar as pinned bookmarks
-      node.children?.forEach(child => {
-        if (child.url) {
-          pinnedBookmarks.push({
-            title: child.title,
-            url: child.url,
-          });
-        }
+    // Skip root node processing
+    if (!node.parentId && node.children) {
+      node.children.forEach(processNode);
+      return;
+    }
+
+    // Process Bookmarks Bar items as quick access
+    if (node.parentId === "1" && node.url) {
+      pinnedBookmarks.push({
+        title: node.title,
+        url: node.url,
       });
       return;
     }
 
-    if (node.title === 'Other Bookmarks' || node.title === 'Synced Bookmarks') {
-      return;
-    }
-
-    if (!node.url && node.children) {
+    // Process folders (nodes with children but no URL)
+    if (!node.url && node.children && node.title !== "Bookmarks Bar") {
       const bookmarks = node.children
-        .filter((child) => child.url)
-        .map((child) => ({
+        .filter(child => child.url)
+        .map(child => ({
           title: child.title,
           url: child.url!,
         }));
 
-      processedFolders.push({
-        title: node.title,
-        bookmarks,
-      });
-    }
+      if (bookmarks.length > 0 || node.children.length > 0) {
+        processedFolders.push({
+          title: node.title,
+          bookmarks,
+        });
+      }
 
-    if (node.children) {
-      node.children.forEach(processNode);
+      // Process subfolders
+      node.children
+        .filter(child => !child.url && child.children)
+        .forEach(processNode);
     }
   };
 
+  // Start processing from the root nodes
   bookmarks.forEach(processNode);
-  return { 
-    folders: processedFolders, 
-    quickAccess: pinnedBookmarks.length > 0 ? pinnedBookmarks : getSamplePinnedBookmarks() 
+
+  console.log('Processed folders:', processedFolders);
+  
+  return {
+    folders: processedFolders,
+    quickAccess: pinnedBookmarks.length > 0 ? pinnedBookmarks : getSamplePinnedBookmarks(),
   };
 };
 
@@ -61,19 +66,17 @@ export const getSamplePinnedBookmarks = (): Bookmark[] => [
 
 export const getSampleData = (): ProcessedFolder[] => [
   {
-    title: "Development Resources",
+    title: "Development",
     bookmarks: [
       { title: "GitHub", url: "https://github.com" },
       { title: "Stack Overflow", url: "https://stackoverflow.com" },
-      { title: "MDN Web Docs", url: "https://developer.mozilla.org" },
     ],
   },
   {
-    title: "Social Media",
+    title: "Social",
     bookmarks: [
       { title: "Twitter", url: "https://twitter.com" },
       { title: "LinkedIn", url: "https://linkedin.com" },
-      { title: "Facebook", url: "https://facebook.com" },
     ],
   },
 ];
