@@ -8,14 +8,44 @@ export const getChromeBookmarks = async (): Promise<ChromeBookmark[]> => {
       });
     } else {
       console.log('Development mode: returning sample bookmarks');
+      // Return sample data in development mode
       resolve([{
         id: "1",
-        title: "Sample Folder",
-        children: [{
-          id: "2",
-          title: "Sample Bookmark",
-          url: "https://example.com"
-        }]
+        title: "Bookmarks Bar",
+        children: [
+          {
+            id: "2",
+            title: "Development",
+            children: [
+              {
+                id: "3",
+                title: "GitHub",
+                url: "https://github.com"
+              },
+              {
+                id: "4",
+                title: "Stack Overflow",
+                url: "https://stackoverflow.com"
+              }
+            ]
+          },
+          {
+            id: "5",
+            title: "Social",
+            children: [
+              {
+                id: "6",
+                title: "Twitter",
+                url: "https://twitter.com"
+              },
+              {
+                id: "7",
+                title: "LinkedIn",
+                url: "https://linkedin.com"
+              }
+            ]
+          }
+        ]
       }]);
     }
   });

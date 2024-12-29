@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { 
   getChromeBookmarks, 
@@ -29,10 +29,18 @@ export function useBookmarks() {
         description: "Failed to fetch bookmarks. Please try again.",
         variant: "destructive",
       });
+      // Even on error, we should set some default data to prevent infinite loading
+      setFolders([]);
+      setQuickAccessBookmarks([]);
     } finally {
       setIsLoading(false);
     }
   }, [toast]);
+
+  // Add useEffect to fetch bookmarks on mount
+  useEffect(() => {
+    fetchBookmarks();
+  }, [fetchBookmarks]);
 
   const moveBookmark = useCallback(async (url: string, fromFolder: string, toFolder: string) => {
     try {
