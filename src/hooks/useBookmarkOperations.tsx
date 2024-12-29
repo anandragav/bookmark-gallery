@@ -7,6 +7,10 @@ export function useBookmarkOperations(onSuccess?: () => void) {
 
   const createFolder = useCallback(async (folderName: string) => {
     try {
+      if (!folderName.trim()) {
+        throw new Error('Folder name cannot be empty');
+      }
+      
       await createChromeFolder(folderName);
       toast({
         title: "Success",

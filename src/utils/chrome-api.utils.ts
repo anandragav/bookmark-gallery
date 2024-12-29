@@ -132,6 +132,7 @@ export const createChromeFolder = async (folderName: string): Promise<ChromeBook
       });
     } else {
       console.log('Development mode: simulating folder creation');
+      // In development mode, return a mock folder
       resolve({
         id: "mock-id-" + Date.now(),
         title: folderName,
