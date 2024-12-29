@@ -5,11 +5,22 @@ let embeddingModel: any = null;
 
 export async function initializeEmbeddingModel() {
   if (!embeddingModel) {
-    embeddingModel = await pipeline(
-      "feature-extraction",
-      "mixedbread-ai/mxbai-embed-xsmall-v1",
-      { device: "cpu" }
-    );
+    try {
+      // Try WebGPU first
+      embeddingModel = await pipeline(
+        "feature-extraction",
+        "mixedbread-ai/mxbai-embed-xsmall-v1",
+        { device: "webgpu" }
+      );
+    } catch (error) {
+      console.log("WebGPU not available, falling back to WASM");
+      // Fall back to WASM if WebGPU is not available
+      embeddingModel = await pipeline(
+        "feature-extraction",
+        "mixedbread-ai/mxbai-embed-xsmall-v1",
+        { device: "wasm" }
+      );
+    }
   }
   return embeddingModel;
 }
@@ -53,7 +64,7 @@ export async function smartSearch(query: string, folders: { title: string; bookm
 
     return results
       .sort((a, b) => b.score - a.score)
-      .filter(result => result.score > 0.5); // Only return relevant results
+      .filter(result => result.score > 0.5);
   } catch (error) {
     console.error('Error in smart search:', error);
     return [];
