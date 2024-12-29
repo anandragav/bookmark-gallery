@@ -3,7 +3,7 @@ import { BookmarkSearch } from "./BookmarkSearch";
 import { ThemeToggle } from "./ThemeToggle";
 import { ViewToggle } from "./ViewToggle";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Folder } from "@/types/bookmark.types";
+import { ProcessedFolder } from "@/types/bookmark.types";
 
 interface BookmarksHeaderProps {
   searchQuery: string;
@@ -12,7 +12,7 @@ interface BookmarksHeaderProps {
   onSortChange: (option: string) => void;
   view: "grid" | "list";
   onViewChange: (view: "grid" | "list") => void;
-  folders: Folder[];
+  folders: ProcessedFolder[];
   onSmartSearchResults: (results: any[]) => void;
 }
 

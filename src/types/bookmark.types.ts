@@ -23,3 +23,6 @@ export interface ChromeBookmark {
 export interface BookmarkTreeNode extends ChromeBookmark {
   children?: BookmarkTreeNode[];
 }
+
+// Adding Folder type which is equivalent to ProcessedFolder
+export type Folder = ProcessedFolder;
