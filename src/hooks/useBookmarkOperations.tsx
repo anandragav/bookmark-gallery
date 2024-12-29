@@ -2,17 +2,19 @@ import { useCallback } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { createChromeFolder, createChromeBookmark } from "@/utils/chrome-api.utils";
 
-export function useBookmarkOperations(fetchBookmarks: () => Promise<void>) {
+export function useBookmarkOperations(onSuccess?: () => void) {
   const { toast } = useToast();
 
   const createFolder = useCallback(async (folderName: string) => {
     try {
       await createChromeFolder(folderName);
-      await fetchBookmarks();
       toast({
         title: "Success",
         description: "Folder created successfully",
       });
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error('Error creating folder:', error);
       toast({
@@ -21,7 +23,7 @@ export function useBookmarkOperations(fetchBookmarks: () => Promise<void>) {
         variant: "destructive",
       });
     }
-  }, [fetchBookmarks, toast]);
+  }, [toast, onSuccess]);
 
   const createBookmark = useCallback(async (folderTitle: string, url: string, title: string) => {
     try {
@@ -30,11 +32,13 @@ export function useBookmarkOperations(fetchBookmarks: () => Promise<void>) {
           if (results.length > 0) {
             const folderId = results[0].id;
             await createChromeBookmark(folderId, url, title);
-            await fetchBookmarks();
             toast({
               title: "Success",
               description: "Bookmark created successfully",
             });
+            if (onSuccess) {
+              onSuccess();
+            }
           } else {
             throw new Error('Folder not found');
           }
@@ -45,6 +49,9 @@ export function useBookmarkOperations(fetchBookmarks: () => Promise<void>) {
           title: "Success",
           description: "Bookmark created successfully (Development mode)",
         });
+        if (onSuccess) {
+          onSuccess();
+        }
       }
     } catch (error) {
       console.error('Error creating bookmark:', error);
@@ -54,7 +61,7 @@ export function useBookmarkOperations(fetchBookmarks: () => Promise<void>) {
         variant: "destructive",
       });
     }
-  }, [fetchBookmarks, toast]);
+  }, [toast, onSuccess]);
 
   return {
     createFolder,

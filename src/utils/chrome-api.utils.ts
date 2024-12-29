@@ -86,23 +86,32 @@ export const deleteFolder = async (folderTitle: string) => {
   });
 };
 
-export const createChromeFolder = async (folderName: string) => {
+export const createChromeFolder = async (folderName: string): Promise<ChromeBookmark> => {
   return new Promise((resolve, reject) => {
     if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+      // Create folder in the bookmarks bar (parentId: "1")
       chrome.bookmarks.create({
         title: folderName,
-        parentId: "1" // Creates in the bookmarks bar
+        parentId: "1"
       }, (result) => {
-        resolve(result);
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve(result);
+        }
       });
     } else {
       console.log('Development mode: simulating folder creation');
-      resolve({ id: "mock-id", title: folderName });
+      resolve({
+        id: "mock-id-" + Date.now(),
+        title: folderName,
+        dateAdded: Date.now()
+      });
     }
   });
 };
 
-export const createChromeBookmark = async (folderId: string, url: string, title: string) => {
+export const createChromeBookmark = async (folderId: string, url: string, title: string): Promise<ChromeBookmark> => {
   return new Promise((resolve, reject) => {
     if (typeof chrome !== 'undefined' && chrome.bookmarks) {
       chrome.bookmarks.create({
@@ -110,11 +119,20 @@ export const createChromeBookmark = async (folderId: string, url: string, title:
         title: title,
         url: url
       }, (result) => {
-        resolve(result);
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve(result);
+        }
       });
     } else {
       console.log('Development mode: simulating bookmark creation');
-      resolve({ id: "mock-id", title, url });
+      resolve({
+        id: "mock-id-" + Date.now(),
+        title,
+        url,
+        dateAdded: Date.now()
+      });
     }
   });
 };

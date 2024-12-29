@@ -9,6 +9,18 @@ import { ViewToggle } from "./ViewToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { BookmarkSearch } from "./BookmarkSearch";
 import { Bookmark } from "@/types/bookmark.types";
+import { Button } from "@/components/ui/button";
+import { FolderPlus } from "lucide-react";
+import { useBookmarkOperations } from "@/hooks/useBookmarkOperations";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 interface BookmarksHeaderProps {
   searchQuery: string;
@@ -31,6 +43,21 @@ export function BookmarksHeader({
   folders,
   onSmartSearchResults,
 }: BookmarksHeaderProps) {
+  const [newFolderName, setNewFolderName] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { createFolder } = useBookmarkOperations(() => {
+    // Refresh the page after creating a folder
+    window.location.reload();
+  });
+
+  const handleCreateFolder = async () => {
+    if (newFolderName.trim()) {
+      await createFolder(newFolderName.trim());
+      setNewFolderName("");
+      setIsDialogOpen(false);
+    }
+  };
+
   return (
     <header className="mb-16">
       <div className="flex items-center justify-between mb-8">
@@ -63,6 +90,33 @@ export function BookmarksHeader({
           </SelectContent>
         </Select>
         <ViewToggle view={view} onViewChange={onViewChange} />
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="icon">
+              <FolderPlus className="h-4 w-4" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Folder</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4">
+              <Input
+                placeholder="Folder name"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleCreateFolder();
+                  }
+                }}
+              />
+              <Button onClick={handleCreateFolder}>
+                Create Folder
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </header>
   );
