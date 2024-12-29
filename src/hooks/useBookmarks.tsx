@@ -19,7 +19,9 @@ export function useBookmarks() {
     setIsLoading(true);
     try {
       const bookmarks = await getChromeBookmarks();
+      console.log('Fetched bookmarks:', bookmarks);
       const processedData = processBookmarks(bookmarks);
+      console.log('Processed bookmarks:', processedData);
       setFolders(processedData.folders);
       setQuickAccessBookmarks(processedData.quickAccess);
     } catch (error) {
@@ -36,17 +38,34 @@ export function useBookmarks() {
     }
   }, [toast]);
 
-  // Add event listener for bookmark updates
+  // Add Chrome bookmarks event listeners
   useEffect(() => {
     const handleBookmarksUpdate = () => {
+      console.log('Bookmarks updated, fetching new data...');
       fetchBookmarks();
     };
 
+    // Listen for both custom event and Chrome API events
     window.addEventListener('bookmarks-updated', handleBookmarksUpdate);
+    
+    if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+      chrome.bookmarks.onCreated.addListener(handleBookmarksUpdate);
+      chrome.bookmarks.onRemoved.addListener(handleBookmarksUpdate);
+      chrome.bookmarks.onChanged.addListener(handleBookmarksUpdate);
+      chrome.bookmarks.onMoved.addListener(handleBookmarksUpdate);
+    }
+
+    // Initial fetch
     fetchBookmarks();
 
     return () => {
       window.removeEventListener('bookmarks-updated', handleBookmarksUpdate);
+      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+        chrome.bookmarks.onCreated.removeListener(handleBookmarksUpdate);
+        chrome.bookmarks.onRemoved.removeListener(handleBookmarksUpdate);
+        chrome.bookmarks.onChanged.removeListener(handleBookmarksUpdate);
+        chrome.bookmarks.onMoved.removeListener(handleBookmarksUpdate);
+      }
     };
   }, [fetchBookmarks]);
 

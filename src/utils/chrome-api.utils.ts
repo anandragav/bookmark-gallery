@@ -1,14 +1,16 @@
 import { ChromeBookmark } from "@/types/bookmark.types";
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 export const getChromeBookmarks = async (): Promise<ChromeBookmark[]> => {
   return new Promise((resolve) => {
     if (typeof chrome !== 'undefined' && chrome.bookmarks) {
       chrome.bookmarks.getTree((bookmarkTreeNodes) => {
+        console.log('Chrome API returned bookmarks:', bookmarkTreeNodes);
         resolve(bookmarkTreeNodes);
       });
     } else {
       console.log('Development mode: returning sample bookmarks');
-      // Return sample data in development mode
       resolve([{
         id: "1",
         title: "Bookmarks Bar",
@@ -136,11 +138,13 @@ export const createChromeFolder = async (folderName: string): Promise<ChromeBook
             reject(chrome.runtime.lastError);
           } else {
             console.log('Folder created successfully:', result);
+            // Dispatch event to update UI
+            window.dispatchEvent(new Event('bookmarks-updated'));
             resolve(result);
           }
         });
       });
-    } else {
+    } else if (isDevelopment) {
       console.log('Development mode: simulating folder creation');
       // In development mode, return a mock folder with a delay to simulate API call
       setTimeout(() => {
@@ -150,8 +154,12 @@ export const createChromeFolder = async (folderName: string): Promise<ChromeBook
           dateAdded: Date.now()
         };
         console.log('Mock folder created:', mockFolder);
+        // Dispatch event to update UI
+        window.dispatchEvent(new Event('bookmarks-updated'));
         resolve(mockFolder);
       }, 500);
+    } else {
+      reject(new Error('Chrome API not available'));
     }
   });
 };
