@@ -14,8 +14,7 @@ const Index = () => {
     isLoading, 
     quickAccessBookmarks, 
     removeBookmark,
-    moveBookmark,
-    deleteFolder
+    moveBookmark
   } = useBookmarks();
 
   const [smartSearchResults, setSmartSearchResults] = useState<any[]>([]);
@@ -81,7 +80,6 @@ const Index = () => {
           isLoading={isLoading}
           onRemoveBookmark={removeBookmark}
           onMoveBookmark={moveBookmark}
-          onDeleteFolder={deleteFolder}
           availableFolders={folders.map(f => f.title)}
         />
       </div>
