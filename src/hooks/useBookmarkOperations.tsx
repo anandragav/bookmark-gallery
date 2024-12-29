@@ -24,6 +24,9 @@ export function useBookmarkOperations(onSuccess?: () => void) {
         description: "Folder created successfully",
       });
       
+      // Force a page reload to refresh the bookmarks
+      window.location.reload();
+      
       if (onSuccess) {
         onSuccess();
       }

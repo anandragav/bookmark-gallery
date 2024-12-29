@@ -16,6 +16,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -46,15 +47,15 @@ export function BookmarksHeader({
   const [newFolderName, setNewFolderName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { createFolder } = useBookmarkOperations(() => {
-    // Refresh the page after creating a folder
-    window.location.reload();
+    // Close dialog and reset input after successful creation
+    setIsDialogOpen(false);
+    setNewFolderName("");
+    // Note: removed window.location.reload() as it's not needed
   });
 
   const handleCreateFolder = async () => {
     if (newFolderName.trim()) {
       await createFolder(newFolderName.trim());
-      setNewFolderName("");
-      setIsDialogOpen(false);
     }
   };
 
@@ -99,6 +100,9 @@ export function BookmarksHeader({
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create New Folder</DialogTitle>
+              <DialogDescription>
+                Enter a name for your new bookmark folder.
+              </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-4">
               <Input
