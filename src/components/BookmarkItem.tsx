@@ -1,12 +1,5 @@
-import { ExternalLink, Copy, Check, MoveRight } from "lucide-react";
+import { ExternalLink, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useState } from "react";
 
 interface BookmarkItemProps {
   bookmark: {
@@ -19,9 +12,6 @@ interface BookmarkItemProps {
   handleCopyUrl: (url: string, title: string) => void;
   getFaviconUrl: (url: string) => string | null;
   folderTitle: string;
-  onRemoveBookmark: (url: string, folderTitle: string) => void;
-  onMoveBookmark: (url: string, fromFolder: string, toFolder: string) => void;
-  availableFolders: string[];
 }
 
 export function BookmarkItem({ 
@@ -31,9 +21,6 @@ export function BookmarkItem({
   copiedStates,
   handleCopyUrl,
   getFaviconUrl,
-  folderTitle,
-  onMoveBookmark,
-  availableFolders
 }: BookmarkItemProps) {
   const faviconUrl = getFaviconUrl(bookmark.url);
 
@@ -84,31 +71,6 @@ export function BookmarkItem({
             <Copy className="h-4 w-4" />
           )}
         </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <MoveRight className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {availableFolders
-              .filter(folder => folder !== folderTitle)
-              .map((folder) => (
-                <DropdownMenuItem
-                  key={folder}
-                  onClick={() => onMoveBookmark(bookmark.url, folderTitle, folder)}
-                >
-                  Move to {folder}
-                </DropdownMenuItem>
-              ))
-            }
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </div>
   );

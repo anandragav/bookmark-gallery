@@ -24,8 +24,6 @@ interface BookmarkFolderProps {
   thumbnailUrl?: string;
   view: "grid" | "list";
   onRemoveBookmark: (url: string, folderTitle: string) => void;
-  onMoveBookmark: (url: string, fromFolder: string, toFolder: string) => void;
-  onDeleteFolder?: (folderTitle: string) => void;
   availableFolders: string[];
 }
 
@@ -35,8 +33,6 @@ export function BookmarkFolder({
   thumbnailUrl, 
   view,
   onRemoveBookmark,
-  onMoveBookmark,
-  onDeleteFolder,
   availableFolders
 }: BookmarkFolderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -132,37 +128,35 @@ export function BookmarkFolder({
                 {bookmarks.length} bookmark{bookmarks.length !== 1 ? 's' : ''}
               </p>
             </div>
-            {onDeleteFolder && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="ml-2 text-destructive hover:text-destructive"
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-2 text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Delete folder</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete folder</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete the folder "{title}" and all its bookmarks? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={() => onRemoveBookmark(title)}
                   >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Delete folder</span>
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete folder</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete the folder "{title}" and all its bookmarks? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={() => onDeleteFolder(title)}
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>
@@ -185,8 +179,6 @@ export function BookmarkFolder({
                 getFaviconUrl={getFaviconUrl}
                 folderTitle={title}
                 onRemoveBookmark={onRemoveBookmark}
-                onMoveBookmark={onMoveBookmark}
-                availableFolders={availableFolders}
               />
             ))}
           </div>

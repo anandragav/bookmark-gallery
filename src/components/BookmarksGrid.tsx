@@ -17,8 +17,6 @@ interface BookmarksGridProps {
   view: "grid" | "list";
   isLoading?: boolean;
   onRemoveBookmark: (url: string, folderTitle: string) => void;
-  onMoveBookmark: (url: string, fromFolder: string, toFolder: string) => void;
-  onDeleteFolder?: (folderTitle: string) => void;
   availableFolders: string[];
 }
 
@@ -27,17 +25,15 @@ export function BookmarksGrid({
   view, 
   isLoading,
   onRemoveBookmark,
-  onMoveBookmark,
-  onDeleteFolder,
   availableFolders
 }: BookmarksGridProps) {
   if (isLoading) {
     return (
       <div className={view === "grid" 
-        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" 
+        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" 
         : "flex flex-col gap-4"
       }>
-        {Array.from({ length: 6 }).map((_, index) => (
+        {Array.from({ length: 8 }).map((_, index) => (
           <BookmarkSkeleton key={index} view={view} />
         ))}
       </div>
@@ -46,7 +42,7 @@ export function BookmarksGrid({
 
   return (
     <div className={view === "grid" 
-      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" 
+      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" 
       : "flex flex-col gap-4"
     }>
       {folders.map((folder, index) => (
@@ -57,8 +53,6 @@ export function BookmarksGrid({
             thumbnailUrl={folder.thumbnailUrl}
             view={view}
             onRemoveBookmark={onRemoveBookmark}
-            onMoveBookmark={onMoveBookmark}
-            onDeleteFolder={onDeleteFolder}
             availableFolders={availableFolders}
           />
         </div>

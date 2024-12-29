@@ -8,43 +8,48 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
   const pinnedBookmarks: Bookmark[] = [];
 
   const processNode = (node: ChromeBookmark) => {
-    // Process Bookmarks Bar items
-    if (node.parentId === "1") {
-      // If it's a direct URL bookmark in the Bookmarks Bar, add to quick access
-      if (node.url) {
-        pinnedBookmarks.push({
-          title: node.title,
-          url: node.url,
-        });
-      }
-      // If it's a folder in the Bookmarks Bar, process it
-      else if (node.children) {
-        const bookmarks = node.children
-          .filter(child => child.url) // Only include items with URLs (actual bookmarks)
-          .map(child => ({
-            title: child.title,
-            url: child.url!,
-          }));
-
-        if (bookmarks.length > 0) {
-          processedFolders.push({
-            title: node.title,
-            bookmarks,
-          });
-        }
-      }
-    }
-
-    // Recursively process children
     if (node.children) {
-      node.children.forEach(processNode);
+      // Process direct bookmarks in the Bookmarks Bar
+      const directBookmarks = node.children
+        .filter(child => child.url)
+        .map(child => ({
+          title: child.title,
+          url: child.url!,
+        }));
+
+      if (directBookmarks.length > 0) {
+        processedFolders.push({
+          title: "Bookmarks Bar",
+          bookmarks: directBookmarks,
+        });
+        pinnedBookmarks.push(...directBookmarks.slice(0, 6));
+      }
+
+      // Process folders in the Bookmarks Bar
+      node.children
+        .filter(child => !child.url && child.children)
+        .forEach(folder => {
+          const bookmarks = folder.children
+            ?.filter(child => child.url)
+            .map(child => ({
+              title: child.title,
+              url: child.url!,
+            })) || [];
+
+          if (bookmarks.length > 0) {
+            processedFolders.push({
+              title: folder.title,
+              bookmarks,
+            });
+          }
+        });
     }
   };
 
-  // Start processing from the Bookmarks Bar
+  // Start processing from the root
   const bookmarksBar = bookmarks[0]?.children?.find(node => node.title === "Bookmarks Bar");
-  if (bookmarksBar?.children) {
-    bookmarksBar.children.forEach(processNode);
+  if (bookmarksBar) {
+    processNode(bookmarksBar);
   }
 
   console.log('Processed folders:', processedFolders);
