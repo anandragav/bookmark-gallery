@@ -1,284 +1,192 @@
-"use client"
-
-import { cn } from "@/lib/utils"
-import React, { useEffect, useRef, useState } from "react"
-
-interface MousePosition {
-  x: number
-  y: number
-}
-
-function MousePosition(): MousePosition {
-  const [mousePosition, setMousePosition] = useState<MousePosition>({
-    x: 0,
-    y: 0,
-  })
-
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      setMousePosition({ x: event.clientX, y: event.clientY })
-    }
-
-    window.addEventListener("mousemove", handleMouseMove)
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove)
-    }
-  }, [])
-
-  return mousePosition
-}
+import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 interface ParticlesProps {
-  className?: string
-  quantity?: number
-  staticity?: number
-  ease?: number
-  size?: number
-  refresh?: boolean
-  color?: string
-  vx?: number
-  vy?: number
+  className?: string;
+  quantity?: number;
+  staticity?: number;
+  ease?: number;
+  refresh?: boolean;
+  color?: string;
 }
 
-function hexToRgb(hex: string): number[] {
-  hex = hex.replace("#", "")
+interface MousePosition {
+  x: number;
+  y: number;
+}
 
-  if (hex.length === 3) {
-    hex = hex
-      .split("")
-      .map((char) => char + char)
-      .join("")
+class Particle {
+  x: number;
+  y: number;
+  px: number;
+  py: number;
+  vx: number;
+  vy: number;
+  originX: number;
+  originY: number;
+  ease: number;
+  friction: number;
+  springFactor: number;
+  size: number;
+  color: string;
+
+  constructor(x: number, y: number, color: string) {
+    this.x = x;
+    this.y = y;
+    this.px = x;
+    this.py = y;
+    this.vx = 0;
+    this.vy = 0;
+    this.originX = x;
+    this.originY = y;
+    this.ease = 0.1;
+    this.friction = 0.95;
+    this.springFactor = 0.05;
+    this.size = 3;
+    this.color = color;
   }
 
-  const hexInt = parseInt(hex, 16)
-  const red = (hexInt >> 16) & 255
-  const green = (hexInt >> 8) & 255
-  const blue = hexInt & 255
-  return [red, green, blue]
+  setOrigin(x: number, y: number) {
+    this.originX = x;
+    this.originY = y;
+  }
+
+  think() {
+    let dx = this.originX - this.x;
+    let dy = this.originY - this.y;
+
+    this.vx += dx * this.springFactor;
+    this.vy += dy * this.springFactor;
+
+    this.vx *= this.friction;
+    this.vy *= this.friction;
+
+    this.x += this.vx;
+    this.y += this.vy;
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+    ctx.fill();
+  }
 }
 
-const Particles: React.FC<ParticlesProps> = ({
+export function Particles({
   className = "",
   quantity = 100,
   staticity = 50,
   ease = 50,
-  size = 0.4,
   refresh = false,
   color = "#ffffff",
-  vx = 0,
-  vy = 0,
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const canvasContainerRef = useRef<HTMLDivElement>(null)
-  const context = useRef<CanvasRenderingContext2D | null>(null)
-  const circles = useRef<Circle[]>([])
-  const mousePosition = MousePosition()
-  const mouse = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
-  const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 })
-  const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1
+}: ParticlesProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const context = useRef<CanvasRenderingContext2D | null>(null);
+  const particles = useRef<Particle[]>([]);
+  const mouse = useRef<MousePosition>({ x: 0, y: 0 });
+  const multiplier = useRef(Math.min(Math.max(window.innerWidth / 1000, 0.5), 1));
 
   useEffect(() => {
-    if (canvasRef.current) {
-      context.current = canvasRef.current.getContext("2d")
-    }
-    initCanvas()
-    animate()
-    window.addEventListener("resize", initCanvas)
+    /* @vite-ignore */
+    const path = new URL("./", import.meta.url).pathname;
+    if (!canvasRef.current) return;
 
-    return () => {
-      window.removeEventListener("resize", initCanvas)
-    }
-  }, [color])
+    context.current = canvasRef.current.getContext("2d");
 
-  useEffect(() => {
-    onMouseMove()
-  }, [mousePosition.x, mousePosition.y])
+    const handleResize = () => {
+      if (!canvasRef.current) return;
+      canvasRef.current.width = window.innerWidth;
+      canvasRef.current.height = window.innerHeight;
+      multiplier.current = Math.min(Math.max(window.innerWidth / 1000, 0.5), 1);
+      initParticles();
+    };
 
-  useEffect(() => {
-    initCanvas()
-  }, [refresh])
+    const initParticles = () => {
+      if (!canvasRef.current) return;
+      particles.current = [];
 
-  const initCanvas = () => {
-    resizeCanvas()
-    drawParticles()
-  }
+      const { width, height } = canvasRef.current;
+      const particleCount = Math.floor(quantity * multiplier.current);
 
-  const onMouseMove = () => {
-    if (canvasRef.current) {
-      const rect = canvasRef.current.getBoundingClientRect()
-      const { w, h } = canvasSize.current
-      const x = mousePosition.x - rect.left - w / 2
-      const y = mousePosition.y - rect.top - h / 2
-      const inside = x < w / 2 && x > -w / 2 && y < h / 2 && y > -h / 2
-      if (inside) {
-        mouse.current.x = x
-        mouse.current.y = y
+      for (let i = 0; i < particleCount; i++) {
+        particles.current.push(
+          new Particle(
+            Math.floor(Math.random() * width),
+            Math.floor(Math.random() * height),
+            color
+          )
+        );
       }
-    }
-  }
+    };
 
-  type Circle = {
-    x: number
-    y: number
-    translateX: number
-    translateY: number
-    size: number
-    alpha: number
-    targetAlpha: number
-    dx: number
-    dy: number
-    magnetism: number
-  }
+    const handleMouseMove = (event: MouseEvent) => {
+      if (!canvasRef.current) return;
 
-  const resizeCanvas = () => {
-    if (canvasContainerRef.current && canvasRef.current && context.current) {
-      circles.current.length = 0
-      canvasSize.current.w = canvasContainerRef.current.offsetWidth
-      canvasSize.current.h = canvasContainerRef.current.offsetHeight
-      canvasRef.current.width = canvasSize.current.w * dpr
-      canvasRef.current.height = canvasSize.current.h * dpr
-      canvasRef.current.style.width = `${canvasSize.current.w}px`
-      canvasRef.current.style.height = `${canvasSize.current.h}px`
-      context.current.scale(dpr, dpr)
-    }
-  }
+      const rect = canvasRef.current.getBoundingClientRect();
+      const { width: canvasWidth, height: canvasHeight } = canvasRef.current;
+      const { width: rectWidth, height: rectHeight } = rect;
+      const scaleX = canvasWidth / rectWidth;
+      const scaleY = canvasHeight / rectHeight;
 
-  const circleParams = (): Circle => {
-    const x = Math.floor(Math.random() * canvasSize.current.w)
-    const y = Math.floor(Math.random() * canvasSize.current.h)
-    const translateX = 0
-    const translateY = 0
-    const pSize = Math.floor(Math.random() * 2) + size
-    const alpha = 0
-    const targetAlpha = parseFloat((Math.random() * 0.6 + 0.1).toFixed(1))
-    const dx = (Math.random() - 0.5) * 0.1
-    const dy = (Math.random() - 0.5) * 0.1
-    const magnetism = 0.1 + Math.random() * 4
-    return {
-      x,
-      y,
-      translateX,
-      translateY,
-      size: pSize,
-      alpha,
-      targetAlpha,
-      dx,
-      dy,
-      magnetism,
-    }
-  }
+      mouse.current = {
+        x: (event.clientX - rect.left) * scaleX,
+        y: (event.clientY - rect.top) * scaleY,
+      };
+    };
 
-  const rgb = hexToRgb(color)
+    const animate = () => {
+      if (!context.current || !canvasRef.current) return;
 
-  const drawCircle = (circle: Circle, update = false) => {
-    if (context.current) {
-      const { x, y, translateX, translateY, size, alpha } = circle
-      context.current.translate(translateX, translateY)
-      context.current.beginPath()
-      context.current.arc(x, y, size, 0, 2 * Math.PI)
-      context.current.fillStyle = `rgba(${rgb.join(", ")}, ${alpha})`
-      context.current.fill()
-      context.current.setTransform(dpr, 0, 0, dpr, 0, 0)
-
-      if (!update) {
-        circles.current.push(circle)
-      }
-    }
-  }
-
-  const clearContext = () => {
-    if (context.current) {
       context.current.clearRect(
         0,
         0,
-        canvasSize.current.w,
-        canvasSize.current.h,
-      )
-    }
-  }
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
 
-  const drawParticles = () => {
-    clearContext()
-    const particleCount = quantity
-    for (let i = 0; i < particleCount; i++) {
-      const circle = circleParams()
-      drawCircle(circle)
-    }
-  }
+      particles.current.forEach((particle) => {
+        const { x: mouseX, y: mouseY } = mouse.current;
+        const distX = mouseX - particle.x;
+        const distY = mouseY - particle.y;
+        const dist = Math.sqrt(distX ** 2 + distY ** 2);
+        const staticFactor = (staticity * multiplier.current) / 2;
+        const easeFactor = (ease * multiplier.current) / 400;
 
-  const remapValue = (
-    value: number,
-    start1: number,
-    end1: number,
-    start2: number,
-    end2: number,
-  ): number => {
-    const remapped =
-      ((value - start1) * (end2 - start2)) / (end1 - start1) + start2
-    return remapped > 0 ? remapped : 0
-  }
+        if (dist < staticFactor) {
+          const angle = Math.atan2(distY, distX);
+          const force = (staticFactor - dist) / staticFactor;
 
-  const animate = () => {
-    clearContext()
-    circles.current.forEach((circle: Circle, i: number) => {
-      // Handle the alpha value
-      const edge = [
-        circle.x + circle.translateX - circle.size, // distance from left edge
-        canvasSize.current.w - circle.x - circle.translateX - circle.size, // distance from right edge
-        circle.y + circle.translateY - circle.size, // distance from top edge
-        canvasSize.current.h - circle.y - circle.translateY - circle.size, // distance from bottom edge
-      ]
-      const closestEdge = edge.reduce((a, b) => Math.min(a, b))
-      const remapClosestEdge = parseFloat(
-        remapValue(closestEdge, 0, 20, 0, 1).toFixed(2),
-      )
-      if (remapClosestEdge > 1) {
-        circle.alpha += 0.02
-        if (circle.alpha > circle.targetAlpha) {
-          circle.alpha = circle.targetAlpha
+          particle.setOrigin(
+            particle.x - Math.cos(angle) * force * easeFactor,
+            particle.y - Math.sin(angle) * force * easeFactor
+          );
+        } else {
+          particle.setOrigin(particle.originX, particle.originY);
         }
-      } else {
-        circle.alpha = circle.targetAlpha * remapClosestEdge
-      }
-      circle.x += circle.dx + vx
-      circle.y += circle.dy + vy
-      circle.translateX +=
-        (mouse.current.x / (staticity / circle.magnetism) - circle.translateX) /
-        ease
-      circle.translateY +=
-        (mouse.current.y / (staticity / circle.magnetism) - circle.translateY) /
-        ease
 
-      drawCircle(circle, true)
+        particle.think();
+        particle.draw(context.current!);
+      });
 
-      // circle gets out of the canvas
-      if (
-        circle.x < -circle.size ||
-        circle.x > canvasSize.current.w + circle.size ||
-        circle.y < -circle.size ||
-        circle.y > canvasSize.current.h + circle.size
-      ) {
-        // remove the circle from the array
-        circles.current.splice(i, 1)
-        // create a new circle
-        const newCircle = circleParams()
-        drawCircle(newCircle)
-        // update the circle position
-      }
-    })
-    window.requestAnimationFrame(animate)
-  }
+      requestAnimationFrame(animate);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("mousemove", handleMouseMove);
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [quantity, staticity, ease, refresh, color]);
 
   return (
-    <div
-      className={cn("pointer-events-none", className)}
-      ref={canvasContainerRef}
-      aria-hidden="true"
-    >
-      <canvas ref={canvasRef} className="size-full" />
-    </div>
-  )
+    <canvas
+      className={cn("absolute inset-0 -z-10", className)}
+      ref={canvasRef}
+    />
+  );
 }
-
-export { Particles }
