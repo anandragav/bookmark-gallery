@@ -95,3 +95,31 @@ export const moveBookmark = async (url: string, fromFolder: string, toFolder: st
     console.log('Development mode: moving bookmark');
   }
 };
+
+export const createChromeBookmark = async (folderId: string, url: string, title: string): Promise<ChromeBookmark> => {
+  return new Promise((resolve, reject) => {
+    if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+      chrome.bookmarks.create({
+        parentId: folderId,
+        title: title,
+        url: url
+      }, (result) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+        } else {
+          resolve(result);
+        }
+      });
+    } else {
+      console.log('Development mode: simulating bookmark creation');
+      const mockBookmark = {
+        id: "mock-id-" + Date.now(),
+        parentId: folderId,
+        title,
+        url,
+        dateAdded: Date.now()
+      };
+      resolve(mockBookmark);
+    }
+  });
+};

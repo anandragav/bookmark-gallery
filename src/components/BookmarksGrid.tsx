@@ -18,7 +18,7 @@ interface BookmarksGridProps {
   isLoading?: boolean;
   onRemoveBookmark: (url: string, folderTitle: string) => void;
   onMoveBookmark: (url: string, fromFolder: string, toFolder: string) => void;
-  onDeleteFolder: (folderTitle: string) => void;
+  onDeleteFolder?: (folderTitle: string) => void;
   availableFolders: string[];
 }
 
