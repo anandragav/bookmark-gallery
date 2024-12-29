@@ -13,7 +13,7 @@ export async function initializeEmbeddingModel() {
         "mixedbread-ai/mxbai-embed-xsmall-v1",
         { 
           device: "webgpu",
-          dtype: "float32"
+          dtype: "fp32"
         }
       );
     } catch (error) {
@@ -25,7 +25,7 @@ export async function initializeEmbeddingModel() {
           "mixedbread-ai/mxbai-embed-xsmall-v1",
           { 
             device: "wasm",
-            dtype: "float32"
+            dtype: "fp32"
           }
         );
       } catch (wasmError) {
