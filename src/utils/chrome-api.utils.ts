@@ -1,12 +1,22 @@
-export const getChromeBookmarks = async () => {
-  return new Promise((resolve, reject) => {
+import { ChromeBookmark } from "@/types/bookmark.types";
+
+export const getChromeBookmarks = async (): Promise<ChromeBookmark[]> => {
+  return new Promise((resolve) => {
     if (typeof chrome !== 'undefined' && chrome.bookmarks) {
       chrome.bookmarks.getTree((bookmarkTreeNodes) => {
         resolve(bookmarkTreeNodes);
       });
     } else {
-      console.log('Development mode: returning empty bookmarks');
-      resolve([]);
+      console.log('Development mode: returning sample bookmarks');
+      resolve([{
+        id: "1",
+        title: "Sample Folder",
+        children: [{
+          id: "2",
+          title: "Sample Bookmark",
+          url: "https://example.com"
+        }]
+      }]);
     }
   });
 };
@@ -33,21 +43,18 @@ export const removeBookmark = async (url: string) => {
 export const moveBookmark = async (url: string, fromFolder: string, toFolder: string) => {
   return new Promise((resolve, reject) => {
     if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-      // First find the bookmark in the source folder
       chrome.bookmarks.search({ url }, (results) => {
         if (results.length === 0) {
           reject(new Error('Bookmark not found'));
           return;
         }
 
-        // Then find the target folder
         chrome.bookmarks.search({ title: toFolder }, (folders) => {
           if (folders.length === 0) {
             reject(new Error('Target folder not found'));
             return;
           }
 
-          // Move the bookmark to the target folder
           chrome.bookmarks.move(results[0].id, { parentId: folders[0].id }, () => {
             resolve(true);
           });
@@ -75,6 +82,39 @@ export const deleteFolder = async (folderTitle: string) => {
     } else {
       console.log('Development mode: simulating folder deletion');
       resolve(true);
+    }
+  });
+};
+
+export const createChromeFolder = async (folderName: string) => {
+  return new Promise((resolve, reject) => {
+    if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+      chrome.bookmarks.create({
+        title: folderName,
+        parentId: "1" // Creates in the bookmarks bar
+      }, (result) => {
+        resolve(result);
+      });
+    } else {
+      console.log('Development mode: simulating folder creation');
+      resolve({ id: "mock-id", title: folderName });
+    }
+  });
+};
+
+export const createChromeBookmark = async (folderId: string, url: string, title: string) => {
+  return new Promise((resolve, reject) => {
+    if (typeof chrome !== 'undefined' && chrome.bookmarks) {
+      chrome.bookmarks.create({
+        parentId: folderId,
+        title: title,
+        url: url
+      }, (result) => {
+        resolve(result);
+      });
+    } else {
+      console.log('Development mode: simulating bookmark creation');
+      resolve({ id: "mock-id", title, url });
     }
   });
 };

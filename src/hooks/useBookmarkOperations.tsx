@@ -6,21 +6,13 @@ export function useBookmarkOperations(fetchBookmarks: () => Promise<void>) {
   const { toast } = useToast();
 
   const createFolder = useCallback(async (folderName: string) => {
-    console.log('Creating folder:', folderName);
     try {
-      if (typeof chrome !== 'undefined' && chrome.bookmarks) {
-        await createChromeFolder(folderName);
-        await fetchBookmarks();
-        toast({
-          title: "Success",
-          description: "Folder created successfully",
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: "Folder created successfully (Development mode)",
-        });
-      }
+      await createChromeFolder(folderName);
+      await fetchBookmarks();
+      toast({
+        title: "Success",
+        description: "Folder created successfully",
+      });
     } catch (error) {
       console.error('Error creating folder:', error);
       toast({
@@ -48,6 +40,7 @@ export function useBookmarkOperations(fetchBookmarks: () => Promise<void>) {
           }
         });
       } else {
+        console.log('Development mode: simulating bookmark creation');
         toast({
           title: "Success",
           description: "Bookmark created successfully (Development mode)",

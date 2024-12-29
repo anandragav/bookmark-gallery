@@ -19,3 +19,7 @@ export interface ChromeBookmark {
   dateGroupModified?: number;
   children?: ChromeBookmark[];
 }
+
+export interface BookmarkTreeNode extends ChromeBookmark {
+  children?: BookmarkTreeNode[];
+}
