@@ -1,23 +1,18 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ViewToggle } from "./ViewToggle";
-import { ThemeToggle } from "./ThemeToggle";
+import { Link } from "react-router-dom";
 import { BookmarkSearch } from "./BookmarkSearch";
-import { Bookmark } from "@/types/bookmark.types";
+import { ThemeToggle } from "./ThemeToggle";
+import { ViewToggle } from "./ViewToggle";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Folder } from "@/types/bookmark.types";
 
 interface BookmarksHeaderProps {
   searchQuery: string;
-  onSearchChange: (value: string) => void;
+  onSearchChange: (query: string) => void;
   sortOption: string;
-  onSortChange: (value: string) => void;
+  onSortChange: (option: string) => void;
   view: "grid" | "list";
   onViewChange: (view: "grid" | "list") => void;
-  folders: { title: string; bookmarks: Bookmark[] }[];
+  folders: Folder[];
   onSmartSearchResults: (results: any[]) => void;
 }
 
@@ -32,38 +27,41 @@ export function BookmarksHeader({
   onSmartSearchResults,
 }: BookmarksHeaderProps) {
   return (
-    <header className="mb-16">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold">
-          Better Bookmarks
-        </h1>
-        <ThemeToggle />
+    <div className="flex flex-col gap-4 mb-8">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Bookmark Gallery</h1>
+          <Link 
+            to="/privacy" 
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            Privacy Policy
+          </Link>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select
+            value={sortOption}
+            onValueChange={onSortChange}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="alphabetical">Alphabetical</SelectItem>
+              <SelectItem value="bookmarkCount">Bookmark Count</SelectItem>
+              <SelectItem value="recent">Recent</SelectItem>
+            </SelectContent>
+          </Select>
+          <ViewToggle view={view} onViewChange={onViewChange} />
+          <ThemeToggle />
+        </div>
       </div>
-      <p className="text-lg text-muted-foreground mb-8 text-left">
-        Your bookmarks, beautifully organized in an elegant gallery view
-      </p>
-      <div className="flex items-center gap-4">
-        <BookmarkSearch
-          searchQuery={searchQuery}
-          onSearchChange={onSearchChange}
-          folders={folders}
-          onSmartSearchResults={onSmartSearchResults}
-        />
-        <Select
-          value={sortOption}
-          onValueChange={onSortChange}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="alphabetical">Alphabetical</SelectItem>
-            <SelectItem value="bookmarkCount">Bookmark Count</SelectItem>
-            <SelectItem value="recent">Most Recent</SelectItem>
-          </SelectContent>
-        </Select>
-        <ViewToggle view={view} onViewChange={onViewChange} />
-      </div>
-    </header>
+      <BookmarkSearch
+        searchQuery={searchQuery}
+        onSearchChange={onSearchChange}
+        folders={folders}
+        onSmartSearchResults={onSmartSearchResults}
+      />
+    </div>
   );
 }
