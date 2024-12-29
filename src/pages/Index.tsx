@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { BookmarksHeader } from "@/components/BookmarksHeader";
 import { BookmarksGrid } from "@/components/BookmarksGrid";
@@ -14,7 +14,6 @@ const Index = () => {
     isLoading, 
     quickAccessBookmarks, 
     removeBookmark,
-    moveBookmark
   } = useBookmarks();
 
   const [smartSearchResults, setSmartSearchResults] = useState<any[]>([]);
@@ -79,7 +78,6 @@ const Index = () => {
           view={view} 
           isLoading={isLoading}
           onRemoveBookmark={removeBookmark}
-          onMoveBookmark={moveBookmark}
           availableFolders={folders.map(f => f.title)}
         />
       </div>
