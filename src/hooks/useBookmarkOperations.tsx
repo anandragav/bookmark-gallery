@@ -8,14 +8,22 @@ export function useBookmarkOperations(onSuccess?: () => void) {
   const createFolder = useCallback(async (folderName: string) => {
     try {
       if (!folderName.trim()) {
-        throw new Error('Folder name cannot be empty');
+        toast({
+          title: "Error",
+          description: "Folder name cannot be empty",
+          variant: "destructive",
+        });
+        return;
       }
       
-      await createChromeFolder(folderName);
+      const result = await createChromeFolder(folderName.trim());
+      console.log('Folder creation result:', result);
+      
       toast({
         title: "Success",
         description: "Folder created successfully",
       });
+      
       if (onSuccess) {
         onSuccess();
       }
@@ -23,7 +31,7 @@ export function useBookmarkOperations(onSuccess?: () => void) {
       console.error('Error creating folder:', error);
       toast({
         title: "Error",
-        description: "Failed to create folder. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create folder. Please try again.",
         variant: "destructive",
       });
     }
