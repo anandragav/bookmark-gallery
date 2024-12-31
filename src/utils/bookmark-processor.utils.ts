@@ -22,8 +22,8 @@ const processBookmarkNode = (node: ChromeBookmark): Bookmark[] => {
 const processFolderNode = (node: ChromeBookmark): ProcessedFolder[] => {
   const folders: ProcessedFolder[] = [];
   
-  // Skip root nodes and process only actual folders
-  if (node.title !== "root" && node.title !== "Bookmarks Bar" && node.children && !node.url) {
+  // Process any node that has children and is not a bookmark
+  if (node.children && !node.url) {
     const bookmarks = node.children
       .filter(child => child.url)
       .map(child => ({
@@ -59,7 +59,12 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
   const processedFolders: ProcessedFolder[] = [];
   const pinnedBookmarks: Bookmark[] = [];
 
-  // Find the Bookmarks Bar folder
+  // Process all root nodes and their children
+  bookmarks.forEach(rootNode => {
+    processedFolders.push(...processFolderNode(rootNode));
+  });
+
+  // Find the Bookmarks Bar for quick access items
   const bookmarksBar = bookmarks[0]?.children?.find(node => node.title === "Bookmarks Bar");
   
   if (bookmarksBar) {
@@ -81,7 +86,7 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
       pinnedBookmarks.push(...directBookmarks.slice(0, 6));
     }
 
-    // Process all folders recursively
+    // Process folders in the Bookmarks Bar
     if (bookmarksBar.children) {
       bookmarksBar.children
         .filter(child => child.children && !child.url)
