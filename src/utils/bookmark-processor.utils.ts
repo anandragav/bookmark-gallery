@@ -22,7 +22,7 @@ const processBookmarkNode = (node: ChromeBookmark): Bookmark[] => {
 const processFolderNode = (node: ChromeBookmark): ProcessedFolder[] => {
   const folders: ProcessedFolder[] = [];
   
-  // Process any node that has children and is not a bookmark
+  // Process folders that have children and are not bookmarks
   if (node.children && !node.url) {
     const bookmarks = node.children
       .filter(child => child.url)
@@ -59,24 +59,28 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
   const processedFolders: ProcessedFolder[] = [];
   const pinnedBookmarks: Bookmark[] = [];
 
-  // Process all root nodes and their children
+  // Process the root bookmarks structure
   bookmarks.forEach(rootNode => {
-    processedFolders.push(...processFolderNode(rootNode));
+    if (rootNode.children) {
+      rootNode.children.forEach(child => {
+        if (child.children && !child.url) {
+          processedFolders.push(...processFolderNode(child));
+        }
+      });
+    }
   });
 
-  // Find the Bookmarks Bar for quick access items
+  // Find and process the Bookmarks Bar for quick access
   const bookmarksBar = bookmarks[0]?.children?.find(node => node.title === "Bookmarks Bar");
   
-  if (bookmarksBar) {
-    console.log('Found Bookmarks Bar:', bookmarksBar);
-    
-    // Process direct bookmarks in the Bookmarks Bar
+  if (bookmarksBar?.children) {
+    // Get direct bookmarks from the Bookmarks Bar
     const directBookmarks = bookmarksBar.children
-      ?.filter(child => child.url)
+      .filter(child => child.url)
       .map(child => ({
         title: child.title,
         url: child.url!,
-      })) || [];
+      }));
 
     if (directBookmarks.length > 0) {
       processedFolders.push({
@@ -86,14 +90,12 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
       pinnedBookmarks.push(...directBookmarks.slice(0, 6));
     }
 
-    // Process folders in the Bookmarks Bar
-    if (bookmarksBar.children) {
-      bookmarksBar.children
-        .filter(child => child.children && !child.url)
-        .forEach(folder => {
-          processedFolders.push(...processFolderNode(folder));
-        });
-    }
+    // Process folders within the Bookmarks Bar
+    bookmarksBar.children
+      .filter(child => child.children && !child.url)
+      .forEach(folder => {
+        processedFolders.push(...processFolderNode(folder));
+      });
   }
 
   console.log('Processed folders:', processedFolders);
