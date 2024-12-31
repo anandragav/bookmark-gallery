@@ -52,8 +52,12 @@ const Index = () => {
     }
   });
 
+  console.log('Folders:', folders);
+  console.log('Filtered Folders:', filteredFolders);
+  console.log('Sorted Folders:', sortedFolders);
+
   return (
-    <div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-900">
+    <div className="relative min-h-screen bg-background">
       <Particles
         className="absolute inset-0"
         quantity={100}
