@@ -22,8 +22,8 @@ const processBookmarkNode = (node: ChromeBookmark): Bookmark[] => {
 const processFolderNode = (node: ChromeBookmark): ProcessedFolder[] => {
   const folders: ProcessedFolder[] = [];
   
-  // Process current node if it's a folder (has children but no URL)
-  if (node.children && !node.url) {
+  // Skip root nodes and process only actual folders
+  if (node.title !== "root" && node.title !== "Bookmarks Bar" && node.children && !node.url) {
     const bookmarks = node.children
       .filter(child => child.url)
       .map(child => ({
@@ -55,6 +55,7 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
   folders: ProcessedFolder[];
   quickAccess: Bookmark[];
 } => {
+  console.log('Processing bookmarks:', bookmarks);
   const processedFolders: ProcessedFolder[] = [];
   const pinnedBookmarks: Bookmark[] = [];
 
@@ -62,6 +63,8 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
   const bookmarksBar = bookmarks[0]?.children?.find(node => node.title === "Bookmarks Bar");
   
   if (bookmarksBar) {
+    console.log('Found Bookmarks Bar:', bookmarksBar);
+    
     // Process direct bookmarks in the Bookmarks Bar
     const directBookmarks = bookmarksBar.children
       ?.filter(child => child.url)
@@ -89,7 +92,7 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
   }
 
   console.log('Processed folders:', processedFolders);
-  console.log('Processed bookmarks:', { folders: processedFolders, quickAccess: pinnedBookmarks });
+  console.log('Quick access bookmarks:', pinnedBookmarks);
 
   return {
     folders: processedFolders,
