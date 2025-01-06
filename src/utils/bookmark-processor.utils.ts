@@ -22,8 +22,9 @@ const processBookmarkNode = (node: ChromeBookmark): Bookmark[] => {
 const processFolderNode = (node: ChromeBookmark): ProcessedFolder[] => {
   const folders: ProcessedFolder[] = [];
   
-  // Process this node if it has children (whether it's a root node or nested folder)
+  // Process current node if it has children
   if (node.children) {
+    // Get direct bookmarks from this folder
     const bookmarks = node.children
       .filter(child => child.url)
       .map(child => ({
@@ -31,6 +32,7 @@ const processFolderNode = (node: ChromeBookmark): ProcessedFolder[] => {
         url: child.url!,
       }));
 
+    // Add this folder if it has bookmarks
     if (bookmarks.length > 0) {
       folders.push({
         title: node.title,
@@ -38,7 +40,7 @@ const processFolderNode = (node: ChromeBookmark): ProcessedFolder[] => {
       });
     }
 
-    // Process child folders
+    // Process all child folders recursively
     node.children
       .filter(child => child.children)
       .forEach(childFolder => {
@@ -57,16 +59,10 @@ export const processBookmarks = (bookmarks: ChromeBookmark[]): {
   const processedFolders: ProcessedFolder[] = [];
   const pinnedBookmarks: Bookmark[] = [];
 
-  // Process all nodes including root nodes
+  // Process all root nodes and their children
   bookmarks.forEach(rootNode => {
-    if (rootNode.children) {
-      // Process root level folders
-      rootNode.children
-        .filter(child => child.children)
-        .forEach(folder => {
-          processedFolders.push(...processFolderNode(folder));
-        });
-    }
+    // Add the root node itself if it's a folder with bookmarks
+    processedFolders.push(...processFolderNode(rootNode));
   });
 
   // Find and process the Bookmarks Bar
